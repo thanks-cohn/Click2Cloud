@@ -5,7 +5,7 @@ on:
 jobs:
   windows-right-click-case-83:
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,6 +33,16 @@ jobs:
         shell: cmd
         run: |
           call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --case 83 --timeout-seconds 90
+      - name: Replay the permanent Case 52 regression
+        if: ${{ !cancelled() }}
+        shell: cmd
+        run: |
+          call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --case 52 --timeout-seconds 90
+      - name: Qualify the readiness class across all menu modes
+        if: ${{ !cancelled() }}
+        shell: cmd
+        run: |
+          call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --cases 44 --timeout-seconds 540
       - name: Retain the scenario and all observations
         if: always()
         uses: actions/upload-artifact@v4

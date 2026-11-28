@@ -45,13 +45,30 @@ test('Add preserves existing Default/preferences and distinct Narrow presentatio
 function providerFixture(){const buckets=new Set(['click2cloud-qa']),plans=new Map(),ledger=new Map(),calls=[];let ready=true,denied=false,session='s',uncertain=false;
  const authority=async()=>({sessionId:session,accounts:[{id:'qa-account'},{id:'other'}],scopes:['workers-r2.read','workers-r2.write','workers-scripts.admin','workers-scripts.edit']});
  const oauth={authority,request:async(path,o={})=>{calls.push({path,method:o.method??'GET'});if(o.method==='POST'){buckets.add(JSON.parse(o.body).name);if(uncertain)throw Error('lost reply');return Response.json({success:true});}const name=path.split('/r2/buckets/')[1]?.split('/')[0];if(path.includes('/objects?'))return Response.json({success:true,result:{objects:[]}});if(denied)return Response.json({success:false},{status:403});return buckets.has(name)?Response.json({success:true,result:{name}}):Response.json({success:false,errors:[{code:10006,message:'The specified bucket does not exist.'}]},{status:404});}};
- const transport={status:async t=>({state:ready?'READY':plans.has(scopeKey(t))?'PREPARED':'blocked',code:ready||plans.has(scopeKey(t))?undefined:'WORKER_SETUP_REQUIRED'}),probe:async x=>{assert(await x.authorize());calls.push({probe:x.target});ready=true;return {state:'verified'};},probeStatus:async()=>({state:'verified'})};
+ const transport={status:async t=>({state:ready?'READY':plans.has(scopeKey(t))?'PREPARED':'blocked',code:ready||plans.has(scopeKey(t))?undefined:'WORKER_SETUP_REQUIRED'}),probe:async x=>{assert(await x.authorize());calls.push({probe:x.target});return {state:'verified',operationId:x.operationId};},probeStatus:async(_target,operationId)=>({state:'verified',operationId})};
  const provisioner={lookup:async t=>plans.get(scopeKey(t)),prepare:async(t,o)=>{calls.push({prepare:t,options:o});plans.set(scopeKey(t),{state:'ready',name:o.workerName,prefixScope:o.prefixScope});},markVerified:async()=>{ready=true;}};
  const current={readSetupOperation:async k=>structuredClone(ledger.get(k)),writeSetupOperation:async(k,v)=>ledger.set(k,structuredClone(v))};
  return {locations:createManifestLocations({oauth,provisioner,transport,current}),calls,buckets,ledger,oauth,provisioner,transport,set ready(v){ready=v;},set denied(v){denied=v;},set uncertain(v){uncertain=v;}};
 }
 test('provider binding distinguishes empty virtual prefix, missing bucket, permission denial and wrong connection; no writes',async()=>{const f=providerFixture(),t={...qaRoot(),prefix:'never-materialized/'};assert.equal((await f.locations.inspect([t]))[0].materialization,'VIRTUAL_NOT_MATERIALIZED');assert.equal((await f.locations.inspect([{...t,bucketName:'missing'}]))[0].state,'BUCKET_MISSING');assert.equal((await f.locations.inspect([{...t,accountId:'unknown'}]))[0].state,'NEEDS_LOGIN');f.denied=true;assert.equal((await f.locations.inspect([t]))[0].state,'NO_PERMISSION');assert(f.calls.every(c=>c.method==='GET'));});
 test('real provider-owner create path rechecks bucket, makes one exact POST, prepares scoped Worker and independently verifies readiness; lost POST reply never duplicates',async()=>{const f=providerFixture(),t=qaRoot('click2cloud-qa-2');f.ready=false;f.uncertain=true;const observations=await f.locations.inspect([t]),plan=await f.locations.plan([t],observations);assert.equal(plan.length,1);assert.equal(plan[0].markerObjects,false);const r=await f.locations.create(plan[0],'approved-plan');assert.equal(r.state,'completed',JSON.stringify(r));assert(f.buckets.has(t.bucketName));assert.equal(f.calls.filter(c=>c.method==='POST').length,1);await f.locations.create(plan[0],'approved-plan');assert.equal(f.calls.filter(c=>c.method==='POST').length,1);assert.equal(f.calls.filter(c=>c.probe).length,1);});
+test('concurrent manifest preparation reconciles one lost probe acknowledgement for the exact reviewed scope',async()=>{
+ const f=providerFixture(),target=qaRoot(),writes=[],reads=[];
+ f.ready=false;
+ f.transport.probe=async({target,operationId,authorize})=>{
+  assert(await authorize());writes.push({target,operationId});
+  return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId};
+ };
+ f.transport.probeStatus=async(target,operationId)=>{
+  reads.push({target,operationId});return {state:'verified',operationId};
+ };
+ const [action]=await f.locations.plan([target],await f.locations.inspect([target]));
+ const create=()=>f.locations.create(action,'reviewed-plan');
+ const results=await Promise.all([create(),create()]);
+ assert(results.every(result=>result.state==='completed'),JSON.stringify(results));
+ assert.equal(f.calls.filter(call=>call.prepare).length,1);
+ assert.equal(writes.length,1);assert.deepEqual(reads,writes);assert.deepEqual(writes[0].target,action.target);
+});
 test('single informed creation approval invokes no redundant confirmation, and never activates incomplete creation',async()=>{const f=serviceFixture();f.blocked=new Set(['click2cloud-qa-2']);f.locations.plan=async()=>[{target:qaRoot('click2cloud-qa-2'),workerName:'fixture',prefixScope:'',prefixes:['']}];f.locations.create=async()=>({state:'uncertain',code:'BUCKET_CREATE_REQUIRES_INSPECTION'});const d=await stage(f),r=await f.invoke('provisionMenuManifest',(({partial,...p})=>p)(commitParams(d)));assert.equal(r.state,'completed',JSON.stringify(r));assert.equal(f.confirmations,1);assert.equal(f.writes.length,0);assert.equal(r.data.complete,false);assert.equal(r.data.creationResults[0].state,'uncertain');assert(f.saved.draft);});
 test('manifest methods stay typed, local and distinct from diagnostic protocol',()=>{for(const t of toolRegistry.filter(t=>/Manifest/.test(t.name))){assert.equal(t.version,'3+1.1');assert.equal(t.transport,'trusted-local');assert.throws(()=>validate(t.inputSchema,{debug:true}));}});
 

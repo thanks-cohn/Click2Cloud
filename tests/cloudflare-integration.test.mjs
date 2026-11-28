@@ -47,6 +47,26 @@ test('minimal trusted writer seam accepts a structural test writer without menu/
  const writer=destinationWriter(cap,{}, {'test-writer':()=>({kind:'test-writer',capabilities:{conditionalCreate:true},prepare:async()=>({key:'x'}),write:async args=>{input=args;assert(args.body instanceof ReadableStream);assert.equal(await new Response(args.body).text(),'abc');return {id:'proof'};},verify:async()=>({verified:true})})});
  await writer.write({prepared:await writer.prepare({}),body:new Blob(['abc']).stream(),operationId:'opaque'});assert(!('source' in input));assert.equal((await writer.verify({})).verified,true);assert.throws(()=>destinationWriter(cap));
 });
+test('a readiness response needs exact signed scope, original identity, byte proof and current authorization',async()=>{
+ const operationId=crypto.randomUUID(),destination={...remoteDestination(target),prefix:`exact/.click2cloud-readiness/${operationId}`};
+ const proof={state:'verified',code:'R2_READBACK_BYTES',proofKind:'independent-get-byte-comparison',operationId,destination,
+  receipt:{destination,operationId,key:destination.prefix+'/readiness.txt',size:57,etag:'fixture-etag',version:'fixture-version'}};
+ let response=()=>proof,authorized=true,calls=0;
+ const transport=createRemoteTransport({oauth:{authority:async()=>({sessionId:'s',accounts:[{id:'a'}]})},
+  lookup:async()=>({state:'ready',accountId:'a',bucketName:'bucket',protocol:PROTOCOL,url:'https://worker.fixture.workers.dev',secret:'fixture-signing-value'}),
+  verifyAuthority:async()=>authorized,fetch:async()=>{calls++;return Response.json(response());}});
+ assert.equal((await transport.probeStatus(target,operationId)).state,'verified');
+ for(const change of [value=>{value.receipt.operationId=crypto.randomUUID();},value=>{value.destination={...destination,prefix:'another/'};},
+  value=>{value.receipt.key='another/readiness.txt';},value=>{value.receipt.size=56;},value=>{value.proofKind='metadata-only';}]){
+  response=()=>{const altered=structuredClone(proof);change(altered);return altered;};
+  assert.equal((await transport.probeStatus(target,operationId)).code,'READINESS_PROOF_MISMATCH');
+ }
+ response=()=>{authorized=false;return proof;};
+ assert.equal((await transport.probeStatus(target,operationId)).code,'AUTHORIZATION_LOST');
+ const before=calls;
+ const denied=await transport.probe({target,operationId});
+ assert.equal(denied.code,'AUTHORIZATION_REVOKED');assert.equal(denied.preDispatch,true);assert.equal(calls,before);
+});
 test('real workerd runtime: R2 conditional writes, independent HEAD, durable claim replay and revocation',async()=>{
  const code=(await build({entryPoints:['src/cloudflare/worker.mjs'],bundle:true,write:false,format:'esm',platform:'browser',target:'es2022',plugins:[{name:'explicit-source-fixture',setup(b){b.onResolve({filter:/public-egress\.mjs$/},()=>({path:fileURLToPath(new URL('./fixtures/public-egress.mjs',import.meta.url))}));}}]})).outputFiles[0].text;
  const mock=createFetchMock();mock.disableNetConnect();

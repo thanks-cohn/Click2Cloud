@@ -1,0 +1,154 @@
+{
+  "schema": "redown.case-52-evidence/1",
+  "checkpointStatus": "OPEN_PENDING_REFERENCE_WINDOWS_VERIFICATION",
+  "referenceWindows": {
+    "provenance": "Owner report. The raw reference Windows receipt was unavailable in this workspace.",
+    "revision": "d99033796539066e435313e0807148d269df869b",
+    "extensionVersion": "0.3.32.6",
+    "seed": 271127,
+    "counts": {
+      "PASS": 99,
+      "FAIL": 1,
+      "NOT_TESTED": 0
+    },
+    "case65": "PASS",
+    "case83": "PASS",
+    "case52": {
+      "case": 52,
+      "status": "FAIL",
+      "mode": "simple",
+      "scenario": "transient-health",
+      "phase": "fixture-initialization",
+      "location": "right-click-lab.mjs:271",
+      "causeCode": "ECONNRESET",
+      "injected": false,
+      "durationMs": 137,
+      "route": "/probe",
+      "code": "READINESS_RECONCILE_REQUIRED",
+      "reconciliation": {
+        "route": "/probe-status",
+        "httpStatus": 200,
+        "state": "verified",
+        "code": "R2_READBACK_BYTES",
+        "proofKind": "independent-get-byte-comparison",
+        "matchesOriginalOperation": true,
+        "matchesAuthorizedScope": true
+      }
+    }
+  },
+  "archivedBaselineControl": {
+    "archiveRevision": "d99033796539066e435313e0807148d269df869b",
+    "recipe": "Extract git archive at d990337. In the fixture only, enable the existing warm response-lost injection for the regression flag without changing the assertion. Run the new Case 52 scenario through the archived runtime. The archive has no Git metadata, so the original receipt revision field is empty.",
+    "receipt": "right-click-6f068d21-ab1f-43d5-92fa-7cec976dc9c8",
+    "platform": "linux",
+    "nodeVersion": "24.22.1",
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "observation": {
+      "case": 52,
+      "status": "FAIL",
+      "code": "ERR_ASSERTION",
+      "errorType": "AssertionError",
+      "location": "right-click-lab.mjs:271:12)",
+      "phase": "fixture-initialization",
+      "warmInitialization": {
+        "boundary": "readiness-probe",
+        "operationId": "e615a7ab-8001-49c6-b8f1-085281f3eba5",
+        "requests": [
+          {
+            "route": "/capabilities",
+            "httpStatus": 200,
+            "json": true,
+            "durationMs": 55
+          },
+          {
+            "route": "/probe",
+            "httpStatus": 200,
+            "json": true,
+            "durationMs": 17
+          },
+          {
+            "route": "/probe-status",
+            "httpStatus": 200,
+            "json": true,
+            "durationMs": 12
+          }
+        ],
+        "capability": {
+          "state": "PREPARED",
+          "code": null
+        },
+        "probe": {
+          "state": "uncertain",
+          "code": "READINESS_RECONCILE_REQUIRED",
+          "operationId": "e615a7ab-8001-49c6-b8f1-085281f3eba5",
+          "destination": {
+            "matchesScope": true,
+            "prefix": "qa/folder"
+          },
+          "proofKind": null,
+          "receipt": null
+        },
+        "probeStatus": {
+          "state": "verified",
+          "code": "R2_READBACK_BYTES",
+          "operationId": "e615a7ab-8001-49c6-b8f1-085281f3eba5",
+          "destination": {
+            "matchesScope": true,
+            "prefix": "qa/folder/.click2cloud-readiness/e615a7ab-8001-49c6-b8f1-085281f3eba5"
+          },
+          "proofKind": "independent-get-byte-comparison",
+          "receipt": {
+            "operationId": "e615a7ab-8001-49c6-b8f1-085281f3eba5",
+            "destination": {
+              "matchesScope": true,
+              "prefix": "qa/folder/.click2cloud-readiness/e615a7ab-8001-49c6-b8f1-085281f3eba5"
+            },
+            "key": "qa/folder/.click2cloud-readiness/e615a7ab-8001-49c6-b8f1-085281f3eba5/readiness.txt",
+            "size": 57,
+            "etag": "91f138e8ea059093db304ef5c4a38b9b",
+            "version": "dbdbf84448c6ee74672782115f2f55d7"
+          }
+        }
+      },
+      "fixtureTransport": [
+        {
+          "boundary": "workerd-dispatch",
+          "transport": "local-workerd-loopback",
+          "route": "/probe",
+          "phase": "warm-initialization",
+          "deployment": 1,
+          "durationMs": 19,
+          "injected": true,
+          "type": "TypeError",
+          "code": null,
+          "causeCode": "ECONNRESET",
+          "errno": null,
+          "syscall": null
+        }
+      ],
+      "elapsedMs": 568
+    }
+  },
+  "loopbackInvestigation": {
+    "pinnedComponents": {
+      "miniflare": "4.20260730.0",
+      "workerd": "1.20260730.1"
+    },
+    "established": [
+      "The reference failure was recorded at the local Workerd loopback boundary.",
+      "The Case 52 follow-up read the completed probe from the same runtime before intentional retirement.",
+      "Case 65 evicts the extension host while retaining the started Workerd fixture.",
+      "The pinned Miniflare dispatch uses an Undici pool per runtime loopback origin."
+    ],
+    "unresolved": [
+      "Which peer initiated the reported resets",
+      "Socket reuse in the reference failures",
+      "Whether OS, Workerd, Undici or host environment behavior contributed"
+    ],
+    "diagnostics": [
+      "Preserve observations.json, fixture.log, progress.ndjson and summary.json for the same run.",
+      "Correlate unplanned transport errors against loopbackProbes and runtimeLifecycles.",
+      "Compare socket ordinals and previous routes, HTTP status, recheck runtime ordinal, stderr end/close, and retirement timestamps."
+    ]
+  }
+}

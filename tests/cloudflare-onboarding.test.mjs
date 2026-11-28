@@ -54,6 +54,31 @@ test('setup completion loss resumes by read-only probe identity without redeploy
  const replay=await f.c.setup({accountId:'a',expectedRevision:0,idempotencyKey:'resume'});assert.deepEqual(replay,result);assert.deepEqual(counts(),before);
 });
 
+test('approved setup and Explorer Default reconcile one lost readiness reply before reporting ready',async()=>{
+ for(const entry of ['approved setup','Explorer Default']){
+  const f=fixture({chosen:t,initialized:true}),writes=[],reads=[];
+  await f.current.writeSetupOperation('approval:a',{accountId:'a',approved:true});
+  f.provisioner.lookup=async()=>({state:'ready',prefixScope:''});
+  f.transport.filePlanCurrent=()=>true;
+  f.transport.probe=async({target,operationId,authorize})=>{
+   assert(await authorize());writes.push({target,operationId});
+   return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId};
+  };
+  f.transport.probeStatus=async(target,operationId)=>{
+   reads.push({target,operationId});return {state:'verified',operationId};
+  };
+  if(entry==='approved setup'){
+   const result=await f.c.setup({accountId:'a',target:t,repair:true,expectedRevision:0,idempotencyKey:'returning'});
+   assert.equal(result.code,'CLOUDFLARE_READY');assert.deepEqual(f.state.product.defaultTarget,t);
+  }else{
+   await f.c.ensureFileWorker(t,{authorizeSetup:true,requireWriteProof:true});
+   await f.c.ensureFileWorker(t,{requireWriteProof:true});
+   assert(!f.calls.some(call=>call.prepare));
+  }
+  assert.equal(writes.length,1,entry);assert.deepEqual(reads,writes,entry);assert.deepEqual(writes[0].target,t);
+ }
+});
+
 test('zero active native assignments open manager even when a hidden default remains ready',async()=>{const f=fixture({chosen:t,initialized:true});const result=await f.c.invoke({provider:'cloudflare',emptyAssignment:true,source:{url:'https://public.org/file',filename:'file'}});assert.equal(result.code,'CHOOSE_DESTINATION');assert(!f.calls.some(x=>x?.source||x==='POST'));assert(f.calls.includes('manage'));});
 
 export {fixture,t};

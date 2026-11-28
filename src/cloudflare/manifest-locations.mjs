@@ -1,6 +1,7 @@
 import {normalizeTarget,targetKey,scopeKey} from '../core/menu-identity.mjs';
 import {digest,remoteDestination,fail} from './wire.mjs';
 import {hasWorkerCreateScope,hasWorkerWriteScope} from '../auth/cloudflare-oauth.mjs';
+import {readinessProbeRejected,readWorkerStatus,reconcileReadinessProbe,withCloudflareSetupLock} from './onboarding.mjs';
 const safeCode=e=>/^[A-Z][A-Z0-9_]+$/.test(e?.code??'')?e.code:'LOCATION_CHECK_UNKNOWN';
 // Canonical provider owner for manifest read-only binding and reviewed creation.
 // Never derives account authority from a file. No redown/default/config changes.
@@ -49,8 +50,12 @@ export function createManifestLocations({oauth,provisioner,transport,current}){
   }
   return actions;
  }
- async function create(action,planId,{stillAuthorized=async()=>true}={}){
-  const t=normalizeTarget(action.target),a=await identity();
+ function create(action,planId,{stillAuthorized=async()=>true}={}){
+  const t=normalizeTarget(action.target);
+  return withCloudflareSetupLock(current,scopeKey(t),()=>createLocked(action,planId,t,stillAuthorized));
+ }
+ async function createLocked(action,planId,t,stillAuthorized){
+  const a=await identity();
   const check=async()=>{const now=await identity();if(now.sessionId!==a.sessionId||!now.accounts?.some(x=>x.id===t.accountId)||t.connectionId!=='cloudflare:'+t.accountId||!now.scopes?.includes('workers-r2.write')||!await stillAuthorized())fail('AUTHORIZATION_REVOKED');};
   await check();const id='manifest-resource:'+await digest([planId,scopeKey(t)]);let progress=await current.readSetupOperation(id)??{};
   const save=async extra=>{progress={...progress,...extra};await current.writeSetupOperation(id,progress);};
@@ -66,20 +71,33 @@ export function createManifestLocations({oauth,provisioner,transport,current}){
    await save({bucketExists:true});
   }else if(before.state!=='EXISTS')return {state:'blocked',code:before.code??'BUCKET_LOOKUP_UNCONFIRMED',target:t,progress};
   else await save({bucketExists:true});
-  await check();let status=await transport.status(t);
-  if(status.state!=='READY'){
-   if(action.worker==='prepare'){
+  await check();let status=await readWorkerStatus(transport,t,check);
+  const resumingProbe=progress.probeDispatched;
+  const unresolvedProbe=resumingProbe&&progress.probeOutcome!=='verified';
+  if(status.state!=='READY'||unresolvedProbe){
+   if(action.worker==='prepare'&&!resumingProbe){
     if(!hasWorkerWriteScope(a.scopes))fail('INSUFFICIENT_SCOPE');
     // Existing canonical deployment owner retains generated signing material and
     // reconciles its pending identity/settings. Never deploy arbitrary file code.
     await provisioner.prepare(t,{approved:true,inspect:true,retryDenied:true,prefixScope:action.prefixScope,workerName:action.workerName});await save({workerPrepared:true});
    }
    await check();
-   const operationId=progress.operationId??crypto.randomUUID();let probe;
-   if(progress.probeDispatched)probe=await transport.probeStatus(t,operationId);
-   else {await save({operationId,probeDispatched:true});probe=await transport.probe({target:t,operationId,authorize:async()=>{try{await check();return true;}catch{return false;}}});}
-   if(probe.state!=='verified')return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',target:t,progress};
-   await check();await provisioner.markVerified(t,a.sessionId);status=await transport.status(t);
+   const operationId=progress.operationId??crypto.randomUUID();let initial;
+   if(!resumingProbe){
+    status=await readWorkerStatus(transport,t,check,{afterDeploy:true});
+    if(!['READY','PREPARED'].includes(status.state))return {state:'blocked',code:status.code??'WORKER_NOT_READY',target:t,progress};
+    if(status.state!=='READY'){
+     await save({operationId,probeDispatched:true,probeOutcome:'uncertain'});
+     initial=await transport.probe({target:t,operationId,authorize:async()=>{try{await check();return true;}catch{return false;}}});
+     if(readinessProbeRejected(initial)){await save({probeDispatched:false,probeOutcome:'not-written'});return {state:'blocked',code:initial.code,target:t,progress};}
+    }
+   }
+   if(status.state!=='READY'||unresolvedProbe){
+    if(!await reconcileReadinessProbe(transport,t,operationId,check,{initial}))
+     return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',target:t,progress};
+    await check();await provisioner.markVerified(t,a.sessionId);await save({probeOutcome:'verified'});
+    status=await readWorkerStatus(transport,t,check);
+   }
   }
   await check();await save({ready:status.state==='READY'});return {state:status.state==='READY'?'completed':'blocked',code:status.state==='READY'?'LOCATION_READY':status.code??'WORKER_NOT_READY',target:t,progress};
   }catch(e){return {state:'blocked',code:safeCode(e),target:t,progress};}

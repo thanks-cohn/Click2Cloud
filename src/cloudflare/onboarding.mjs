@@ -15,7 +15,52 @@ import {passiveObservation} from '../core/boundary-observation.mjs';
 const transientWorkerCodes=new Set(['TRANSPORT_UNAVAILABLE','RESPONSE_INVALID','WORKER_UNAVAILABLE','TRANSIENT_API_FAILURE']);
 const propagatingWorkerCodes=new Set([...transientWorkerCodes,'WORKER_ENDPOINT_MISSING','WORKER_BUILD_MISMATCH']);
 const probeRejectedBeforeWrite=new Set(['AUTHORIZATION_DENIED','AUTHORIZATION_REVOKED','CAPABILITY_DENIED','BINDING_MISMATCH','OPERATION_INVALID','ROUTE_DENIED']);
+export const readinessProbeRejected=result=>result?.state==='blocked'&&(result.preDispatch===true||probeRejectedBeforeWrite.has(result.code));
+
+export function withCloudflareSetupLock(current,scope,run){
+ const key='click2cloud-cloudflare-setup:'+scope;
+ if(globalThis.navigator?.locks?.request)return navigator.locks.request(key,run);
+ let locks=setupLocks.get(current);
+ if(!locks)setupLocks.set(current,locks=new Map());
+ const preceding=locks.get(key)??Promise.resolve(),task=preceding.then(run,run);
+ locks.set(key,task);
+ return task.finally(()=>{if(locks.get(key)===task)locks.delete(key);});
+}
+
+// All readiness owners reconcile the same operation through the authenticated
+// read path. A missing object can still have a write in flight.
+export async function reconcileReadinessProbe(transport,target,operationId,revalidate,{initial,observe}={}){
+ const verified=result=>result?.state==='verified'&&result.operationId===operationId;
+ await revalidate();
+ if(verified(initial))return initial;
+ if(readinessProbeRejected(initial))return null;
+ for(let attempt=0;attempt<3;attempt++){
+  let result;
+  try{result=await transport.probeStatus(target,operationId,{signal:AbortSignal.timeout(2500)});}
+  catch(error){if(!transientWorkerCodes.has(error.code))throw error;result={state:'uncertain',code:error.code,operationId};}
+  passiveObservation(observe,result);
+  await revalidate();
+  if(verified(result))return result;
+  if(attempt===2||!transientWorkerCodes.has(result.code)&&!['READINESS_UNVERIFIED','SERVICE_UNAVAILABLE'].includes(result.code))return null;
+  await new Promise(resolve=>setTimeout(resolve,150*2**attempt));
+  await revalidate();
+ }
+}
+
+export async function readWorkerStatus(transport,target,revalidate,{afterDeploy=false,onObservation,sourceBucket,maxAttempts=afterDeploy?8:3}={}){
+ const baseDelay=afterDeploy?250:150,retryCodes=afterDeploy?propagatingWorkerCodes:transientWorkerCodes;
+ for(let attempt=1;;attempt++){
+  const status=await transport.status(target,{sourceBucket,onObservation});
+  if(status.state==='READY'||afterDeploy&&status.state==='PREPARED')return status;
+  passiveObservation(onObservation,{
+   stage:'worker.health',outcome:status.state==='PREPARED'?'pending':'blocked',code:status.code??'WRITE_PROOF_REQUIRED'});
+  if(attempt===maxAttempts||!retryCodes.has(status.code))return status;
+  await new Promise(resolve=>setTimeout(resolve,Math.min(2000,baseDelay*2**(attempt-1))));
+  await revalidate();
+ }
+}
 export function createCloudflareOnboarding({current,oauth,provisioner,transport,inspectBucket,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
+ const withSetupLock=(scope,run)=>withCloudflareSetupLock(current,scope,run);
  const setupApproved=async accountId=>{const a=await current.readSetupOperation?.('approval:'+accountId);return a?.accountId===accountId&&a.approved===true;};
  // recoverCloudflareDestination: a clicked Depth child is owned by its saved
  // scope, not by the current Default. Other modes retain exact target matching.
@@ -97,15 +142,6 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   return setupLocked({accountId,target,repair:!!target,automatic:true,resume,upgrade:authorizeSetup&&readiness.worker?.code==='WORKER_UPGRADE_APPROVAL_REQUIRED',expectedRevision:(await current.read()).product.revision,idempotencyKey});
  }
  function setup(params){return withSetupLock(params.accountId,()=>setupLocked(params));}
- function withSetupLock(accountId,run){
-  const key='click2cloud-cloudflare-setup:'+accountId;
-  if(globalThis.navigator?.locks?.request)return navigator.locks.request(key,run);
-  let locks=setupLocks.get(current);
-  if(!locks)setupLocks.set(current,locks=new Map());
-  const preceding=locks.get(key)??Promise.resolve(),task=preceding.then(run,run);
-  locks.set(key,task);
-  return task.finally(()=>{if(locks.get(key)===task)locks.delete(key);});
- }
  async function setupLocked({accountId,expectedRevision,idempotencyKey,repair=false,target:repairTarget,automatic=false,resume=false,upgrade=false}){
   const started=performance.now(),auth=await account(accountId);let s=await current.read();
   const setupId=accountId+':'+idempotencyKey,prior=await current.readSetupOperation?.(setupId);
@@ -136,13 +172,14 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   await current.writeSetupOperation?.('initialization:'+accountId,{idempotencyKey});
   let progressRecord=prior??{};
   const progress=async(stage,extra={})=>{progressRecord={...progressRecord,accountId,target,stage,...extra};await current.writeSetupOperation?.(setupId,progressRecord);};
-  const stillSelected=async()=>{if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');const now=await current.read();if(initial){if(hasSaved(now))fail('DESTINATIONS_CHANGED_DURING_SETUP');}else if(!savedTargets(now).some(t=>targetKey(t)===targetKey(target))||targetKey(now.product.defaultTarget??{})!==targetKey(selected??{}))fail('DESTINATIONS_CHANGED_DURING_SETUP');return now;};
+  const stillSelected=async()=>{if((await oauth.authority()).sessionId!==auth.sessionId||!await setupApproved(accountId))fail('AUTHORIZATION_REVOKED');const now=await current.read();if(initial){if(hasSaved(now))fail('DESTINATIONS_CHANGED_DURING_SETUP');}else if(!savedTargets(now).some(t=>targetKey(t)===targetKey(target))||targetKey(now.product.defaultTarget??{})!==targetKey(selected??{}))fail('DESTINATIONS_CHANGED_DURING_SETUP');return now;};
   // Consent is persisted only by this explicitly approved API transition. Login
   // alone cannot add it; automatic callers must already have account approval.
   if(typeof current.writeSetupOperation!=='function'||typeof current.readSetupOperation!=='function')fail('SETUP_LEDGER_UNAVAILABLE');
   if(!automatic&&!await setupApproved(accountId))await current.writeSetupOperation('approval:'+accountId,{accountId,approved:true});
-  const recovered=prior?.stage==='probe-dispatched'?await transport.probeStatus(target,prior.operationId):null;
-  if(recovered&&recovered.state!=='verified')return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',operationId:prior.operationId};
+  const resumingProbe=prior?.stage==='probe-dispatched';
+  const recovered=resumingProbe?await reconcileReadinessProbe(transport,target,prior.operationId,stillSelected):null;
+  if(resumingProbe&&!recovered)return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',operationId:prior.operationId};
   if(!prior)await progress('approved');
   await stillSelected();
   if(!exists){await progress('bucket-create-dispatched');try{const r=await oauth.request('/accounts/'+encodeURIComponent(accountId)+'/r2/buckets',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'redown'})});const creation=await r.json();if(!r.ok||creation.success!==true)throw Error('BUCKET_CREATE_UNCONFIRMED');}catch{const again=await r2(accountId);if(again.state!=='ACTIVE'||!again.buckets.some(b=>b.name==='redown'))return {state:'uncertain',code:'BUCKET_CREATE_UNCONFIRMED'};}}
@@ -153,18 +190,25 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    delete progressRecord.failure;await progress('worker-prepared');
    // workers.dev route propagation can briefly return non-JSON after a successful
    // upload. Retry only read-only capabilities, never a write/probe dispatch.
-   let capability;
-   for(let attempt=0;attempt<8;attempt++){
-    await stillSelected();capability=await transport.status(target);
-    if(['READY','PREPARED'].includes(capability.state))break;
-    if(!propagatingWorkerCodes.has(capability.code)||attempt===7)return {state:'blocked',code:capability.code??'WORKER_NOT_READY',stage:'worker-capability',accountId,target};
-    await new Promise(resolve=>setTimeout(resolve,Math.min(2000,250*2**attempt)));
-   }
+   await stillSelected();
+   const capability=await readWorkerStatus(transport,target,stillSelected,{afterDeploy:true});
+   if(!['READY','PREPARED'].includes(capability.state))return {state:'blocked',code:capability.code??'WORKER_NOT_READY',stage:'worker-capability',accountId,target};
   }
   await stillSelected();
-  const operationId=prior?.operationId??crypto.randomUUID();if(!recovered)await progress('probe-dispatched',{operationId});
-  const probe=recovered??await transport.probe({target,operationId,authorize:async()=>{try{await stillSelected();return true;}catch{return false;}}});
-  try{await record({...probe,kind:'readiness',timings:{...probe.timings,provisionMs}});if(probe.state!=='verified')return {state:probe.state==='uncertain'?'uncertain':'blocked',code:probe.code??'READINESS_WRITE_UNVERIFIED'};
+  const operationId=prior?.operationId??crypto.randomUUID();
+  try{
+   let probe=recovered;
+   if(!probe){
+    await progress('probe-dispatched',{operationId,probeOutcome:'uncertain'});
+    const initialProbe=await transport.probe({target,operationId,authorize:async()=>{try{await stillSelected();return true;}catch{return false;}}});
+    if(readinessProbeRejected(initialProbe)){
+     await progress('worker-prepared',{operationId,probeOutcome:'not-written'});
+     return {state:'blocked',code:initialProbe.code,operationId};
+    }
+    probe=await reconcileReadinessProbe(transport,target,operationId,stillSelected,{initial:initialProbe});
+    if(!probe){passiveObservation(record,{...initialProbe,kind:'readiness',timings:{...initialProbe.timings,provisionMs}});return {state:'uncertain',code:initialProbe.code??'READINESS_WRITE_UNVERIFIED',operationId};}
+   }
+   passiveObservation(record,{...probe,kind:'readiness',timings:{...probe.timings,provisionMs}});
    await stillSelected();await provisioner.markVerified(target,auth.sessionId);
    const latest=await stillSelected(),changes=[];
    if(initial){changes.push({type:'createDestination',mode:'simple',target,label:'redown'},{type:'makeDefault',target});}
@@ -172,7 +216,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    const next=changes.length?applyConfigChanges(latest,changes):structuredClone(latest);
    if(initial)next.product.cloudflare.selectedAccountId=accountId;next.product.cloudflare.initialized=[...new Set([...next.product.cloudflare.initialized,accountId])];next.product.cloudflare.pending=next.product.cloudflare.pending.filter(x=>x!==accountId);
    await current.commitProduct({...next,expectedRevision:latest.product.revision,idempotencyKey:'setup-complete:'+setupId,fingerprint:JSON.stringify({target,changes})});
-   readyCache.clear();const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started)};await progress('complete',{operationId,result});return result;
+   readyCache.clear();const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,provisionMs,probe:probe.receipt,durationMs:Math.round(performance.now()-started)};await progress('complete',{operationId,probeOutcome:'verified',result});return result;
   }catch(e){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(e.code??'')?e.code:'LOCAL_COMPLETION_UNCONFIRMED',operationId};}
   });
  }
@@ -268,24 +312,9 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(screenshotUpgrade&&(!authorizeSetup||!screenshotScope))return blocked('SCREENSHOT_WORKER_UPDATE_REQUIRED');
   const bucketKey=await digest([accountId,target.bucketName]),approvalKey='approval:destination:'+bucketKey;
   const retainApproval=()=>current.writeSetupOperation?.(approvalKey,{accountId,bucketName:target.bucketName,approved:true});
-  // Retry the capability read in place. In particular, a failed read after a
-  // verified probe must never repeat that probe or restart deployment.
-  async function readWorkerStatus(checkTarget,revalidate,{afterDeploy=false}={}){
-   const retries=afterDeploy?7:2,baseDelay=afterDeploy?250:150;
-   const retryCodes=afterDeploy?propagatingWorkerCodes:transientWorkerCodes;
-   for(let attempt=0;;attempt++){
-    const status=await transport.status(checkTarget,onObservation?{onObservation}:undefined);
-    if(status.state==='READY'||afterDeploy&&status.state==='PREPARED')return status;
-    passiveObservation(onObservation,{
-     stage:'worker.health',outcome:status.state==='PREPARED'?'pending':'blocked',code:status.code??'WRITE_PROOF_REQUIRED'});
-    if(attempt===retries||!retryCodes.has(status.code))return status;
-    await new Promise(resolve=>setTimeout(resolve,Math.min(2000,baseDelay*2**attempt)));
-    await revalidate();
-   }
-  }
-  const observed=await readWorkerStatus(target,async()=>{
+  const observed=await readWorkerStatus(transport,target,async()=>{
    if((await oauth.authority()).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
-  });
+  },{onObservation});
   if((await oauth.authority()).sessionId!==auth.sessionId)return blocked('AUTHORIZATION_REVOKED');
   const expandScope=authorizeSetup&&!screenshotUpgrade&&!!plan?.prefixScope&&!preserveReadyScope;
   const update=screenshotUpgrade&&observed.screenshotTransfer!=='signed-png-fan-out-v1'&&!transport.screenshotWorkerCurrent(plan);
@@ -320,19 +349,6 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!Array.isArray(auth.scopes)||missing.length)return blocked('INSUFFICIENT_SCOPE',{diagnostic:{code:'INSUFFICIENT_SCOPE',missingScopes:missing}});
   const pointerKey='destination-recovery:'+bucketKey;let pointer=await current.readSetupOperation(pointerKey);
   let existing=pointer&&await current.readSetupOperation(accountId+':'+pointer.idempotencyKey);
-  async function inspectProbe(probeTarget,operationId,revalidate){
-   for(let attempt=0;attempt<3;attempt++){
-    await revalidate();
-    let result;
-    try{result=await transport.probeStatus(probeTarget,operationId,{signal:AbortSignal.timeout(2500)});}
-    catch(error){if(!transientWorkerCodes.has(error.code))throw error;result={code:error.code};}
-    await revalidate();
-    if(result.state==='verified'&&result.operationId===operationId)return result;
-    // A missing object can still have a write in flight. Only retry the read.
-    if(attempt===2||!transientWorkerCodes.has(result.code)&&!['READINESS_UNVERIFIED','SERVICE_UNAVAILABLE'].includes(result.code))return null;
-    await new Promise(resolve=>setTimeout(resolve,150*2**attempt));
-   }
-  }
   async function reconcileOtherPrefixProbe(pending,pendingPointer){
    const probeTarget=normalizeTarget(pending.target),probeScope=configuredScope(s,probeTarget),operationId=pending.operationId;
    if(!probeScope||typeof operationId!=='string'||!operationId)return blocked('PROVISION_RECONCILE_REQUIRED',{setupTarget:probeTarget});
@@ -343,11 +359,11 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     if(!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!originalScope||targetKey(originalScope)!==targetKey(probeScope)||!await destinationApproved(target)||!await destinationApproved(probeTarget))fail('DESTINATIONS_CHANGED_DURING_SETUP');
    };
    try{
-    const probe=await inspectProbe(probeTarget,operationId,stillAuthorized);
+    const probe=await reconcileReadinessProbe(transport,probeTarget,operationId,stillAuthorized);
     if(!probe)return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,probeTarget,operationId};
     await provisioner.markVerified(probeTarget,auth.sessionId);await stillAuthorized();
-    const originalReadiness=await readWorkerStatus(probeTarget,stillAuthorized);await stillAuthorized();
-    const readiness=await readWorkerStatus(target,stillAuthorized);await stillAuthorized();
+    const originalReadiness=await readWorkerStatus(transport,probeTarget,stillAuthorized,{onObservation});await stillAuthorized();
+    const readiness=await readWorkerStatus(transport,target,stillAuthorized,{onObservation});await stillAuthorized();
     if(originalReadiness.state!=='READY'||readiness.state!=='READY')return blocked(readiness.code??originalReadiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness',probeTarget,operationId});
     const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,probeTarget,readiness,probe:probe.receipt,operationId,resumed:true};
     await current.writeSetupOperation(accountId+':'+pendingPointer.idempotencyKey,{...pending,stage:'complete',probeOutcome:'verified',result:{...result,target:probeTarget,readiness:originalReadiness}});
@@ -359,9 +375,17 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    if(!setupScope||pending.scopeTarget&&targetKey(pending.scopeTarget)!==targetKey(setupScope))return blocked('DESTINATIONS_CHANGED_DURING_SETUP',{setupTarget});
    const resumed=await recoverDestinationLocked({target:setupTarget,expectedRevision:s.product.revision,idempotencyKey:pendingPointer.idempotencyKey});
    if(resumed.state!=='completed')return {...resumed,target,setupTarget};
-   const now=await current.read(),clickedScope=selectedScope(now);
-   if((await oauth.authority()).sessionId!==auth.sessionId||!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!await destinationApproved(target))return blocked('DESTINATIONS_CHANGED_DURING_SETUP',{setupTarget});
-   const readiness=await transport.status(target);
+   const stillAuthorized=async()=>{
+    const now=await current.read(),clickedScope=selectedScope(now);
+    if((await oauth.authority()).sessionId!==auth.sessionId||!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!await destinationApproved(target))fail('DESTINATIONS_CHANGED_DURING_SETUP');
+   };
+   let readiness;
+   try{
+    await stillAuthorized();readiness=await readWorkerStatus(transport,target,stillAuthorized,{onObservation});await stillAuthorized();
+   }catch(error){
+    if(error.code==='DESTINATIONS_CHANGED_DURING_SETUP')return blocked(error.code,{setupTarget});
+    throw error;
+   }
    if(readiness.state!=='READY')return blocked(readiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness',setupTarget});
    return {...resumed,target,probeTarget:setupTarget,readiness,resumed:true};
   }
@@ -398,7 +422,7 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    await stillSelected();
    let probe;
    if(prior?.stage==='probe-dispatched'){
-    probe=await inspectProbe(target,prior.operationId,stillSelected);
+    probe=await reconcileReadinessProbe(transport,target,prior.operationId,stillSelected);
     if(!probe)return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,operationId:prior.operationId};
    }else{
     if(!prior)await progress('approved');
@@ -417,24 +441,24 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     }
     await progress('worker-prepared');
     await stillSelected();
-    const capability=await readWorkerStatus(expandScope?{...target,prefix:''}:target,stillSelected,{afterDeploy:true});
+    const capability=await readWorkerStatus(transport,expandScope?{...target,prefix:''}:target,stillSelected,{afterDeploy:true,onObservation});
     if(!['READY','PREPARED'].includes(capability.state))return blocked(capability.code??'WORKER_NOT_READY',{stage:'worker-capability'});
     const operationId=prior?.operationId??crypto.randomUUID();await stillSelected();await progress('probe-dispatched',{operationId,probeOutcome:'uncertain'});
     probe=await transport.probe({target,operationId,authorize:async()=>{try{return await stillSelected();}catch{return false;}}});
     try{void Promise.resolve(record({...probe,kind:'readiness'})).catch(()=>{});}catch{}
-    if(probe.state==='blocked'&&probeRejectedBeforeWrite.has(probe.code)){
+    if(readinessProbeRejected(probe)){
      await progress('worker-prepared',{operationId,probeOutcome:'not-written'});
      return blocked(probe.code,{operationId});
     }
     if(probe.state!=='verified'||probe.operationId!==operationId){
      const code=probe.code??'READINESS_WRITE_UNVERIFIED';
-     probe=await inspectProbe(target,operationId,stillSelected);
+     probe=await reconcileReadinessProbe(transport,target,operationId,stillSelected,{initial:probe});
      if(!probe)return {state:'uncertain',code,accountId,target,operationId};
      try{void Promise.resolve(record({...probe,kind:'readiness'})).catch(()=>{});}catch{}
     }
    }
    await stillSelected();await provisioner.markVerified(target,auth.sessionId);
-   const readiness=await readWorkerStatus(target,stillSelected);await stillSelected();
+   const readiness=await readWorkerStatus(transport,target,stillSelected,{onObservation});await stillSelected();
    if(readiness.state!=='READY')return blocked(readiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness'});
    readyCache.clear();
    const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,readiness,probe:probe.receipt,operationId:progressRecord.operationId};
@@ -452,37 +476,46 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
  async function ensureFileWorker(target,{sourceBucket,authorizeSetup=false,requireWriteProof=false,useSavedApproval=false}={}){
   return withSetupLock(sourceBucket&&sourceBucket!==target.bucketName?JSON.stringify([scopeKey(target),sourceBucket]):scopeKey(target),async()=>{
    const auth=await account(target.accountId),plan=await provisioner.lookup(target,sourceBucket);
+   const id=requireWriteProof?'explorer-default:'+await digest(remoteDestination(target)):null;
+   let pending=id?await current.readSetupOperation?.(id):null;
+   const resumingProbe=pending&&(!pending.probeOutcome||pending.probeOutcome==='uncertain');
+   const revalidate=async()=>{
+    if((await account(target.accountId)).sessionId!==auth.sessionId||
+     !authorizeSetup&&!(useSavedApproval&&await destinationApproved(target)))fail('AUTHORIZATION_REVOKED');
+   };
    const broad=plan?.state==='ready'&&!plan.prefixScope;
-   if(broad&&(!requireWriteProof||!sourceBucket)){
+   if(!resumingProbe&&broad&&(!requireWriteProof||!sourceBucket)){
     if(!requireWriteProof&&transport.filePlanCurrent(plan))return;
-    if(requireWriteProof&&(await transport.status(target)).state==='READY')return;
+    if(requireWriteProof&&(await readWorkerStatus(transport,target,async()=>{
+     if((await account(target.accountId)).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
+    })).state==='READY')return;
    }
    if(!authorizeSetup&&!(useSavedApproval&&await destinationApproved(target)))fail('FILE_SETUP_APPROVAL_REQUIRED');
    if(inspectBucket&&await inspectBucket(target,auth)!==true)fail('AUTHORIZATION_DENIED');
    if(sourceBucket&&inspectBucket&&await inspectBucket({...target,bucketName:sourceBucket},auth)!==true)fail('AUTHORIZATION_DENIED');
    if(!hasWorkerWriteScope(auth.scopes))fail('INSUFFICIENT_SCOPE');
-   if(!broad||!transport.filePlanCurrent(plan)){
+   if(!resumingProbe&&(!broad||!transport.filePlanCurrent(plan))){
     await provisioner.prepare(target,{sourceBucket,approved:true,expandScope:true,inspect:true,retryDenied:true,
      rebuild:!!plan&&!transport.filePlanCurrent(plan),renewSigning:!!plan&&!plan.secret});
    }
-   let readiness;
-   for(let attempt=0;attempt<5;attempt++){
-    if((await account(target.accountId)).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
-    readiness=await transport.status({...target,prefix:''},{sourceBucket});
-    if(['PREPARED','READY'].includes(readiness.state))break;
-    if(!['RESPONSE_INVALID','TRANSPORT_UNAVAILABLE','WORKER_BUILD_MISMATCH'].includes(readiness.code)||attempt===4)fail(readiness.code??'WORKER_NOT_READY');
-    await new Promise(resolve=>setTimeout(resolve,250*2**attempt));
+   let initial;
+   if(!resumingProbe){
+    await revalidate();
+    const readiness=await readWorkerStatus(transport,{...target,prefix:''},revalidate,{sourceBucket,afterDeploy:true,maxAttempts:5});
+    if(!['PREPARED','READY'].includes(readiness.state))fail(readiness.code??'WORKER_NOT_READY');
+    if(!requireWriteProof||readiness.state==='READY')return;
+    pending={operationId:pending?.probeOutcome==='not-written'?pending.operationId:crypto.randomUUID(),probeOutcome:'uncertain'};
+    await current.writeSetupOperation(id,pending);
+    initial=await transport.probe({target,operationId:pending.operationId,authorize:async()=>{await revalidate();return true;}});
+    if(readinessProbeRejected(initial))await current.writeSetupOperation(id,{...pending,probeOutcome:'not-written'});
    }
-   if(!requireWriteProof||readiness.state==='READY')return;
-   const id='explorer-default:'+await digest(remoteDestination(target));
-   let pending=await current.readSetupOperation(id);
-   if(!pending){pending={operationId:crypto.randomUUID()};await current.writeSetupOperation(id,pending);
-    readiness=await transport.probe({target,operationId:pending.operationId});
-   }else readiness=await transport.probeStatus(target,pending.operationId);
-   if(readiness.state!=='verified')fail(readiness.code??'READINESS_RECONCILE_REQUIRED');
-   if((await account(target.accountId)).sessionId!==auth.sessionId)fail('AUTHORIZATION_REVOKED');
+   if(!await reconcileReadinessProbe(transport,target,pending.operationId,revalidate,{initial}))
+    fail(initial?.code??'READINESS_RECONCILE_REQUIRED');
+   await revalidate();
    await provisioner.markVerified(target,auth.sessionId);
-   if((await transport.status(target)).state!=='READY')fail('WORKER_NOT_READY');
+   const verified=await readWorkerStatus(transport,target,revalidate);await revalidate();
+   if(verified.state!=='READY')fail(verified.code??'WORKER_NOT_READY');
+   await current.writeSetupOperation(id,{...pending,probeOutcome:'verified'});
   });
  }
  async function invoke({provider,source,signal,authorize=async()=>true,requestedTarget,setupOnly=false,emptyAssignment=false,dispatchPreparationMs,attentionContext,onAccepted}){

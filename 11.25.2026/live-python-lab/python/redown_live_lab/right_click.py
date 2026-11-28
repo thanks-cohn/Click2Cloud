@@ -17,6 +17,7 @@ MODES = ('simple', 'narrow', 'depth')
 INTERNAL_MODE = {'narrow': 'nested'}
 CONDITIONS = ('cold', 'registration-race', 'returning', 'compatible-build', 'transient-health',
               'revoked', 'sibling', 'lost-deploy-ack', 'endpoint-missing', 'evicted-setup')
+WARM_CONDITIONS = ('returning', 'compatible-build', 'transient-health', 'revoked', 'endpoint-missing')
 FOCUSED = [(mode, condition) for mode in MODES for condition in ('cold', 'registration-race')]
 FOCUSED += [('simple', 'returning'), ('narrow', 'compatible-build'), ('depth', 'transient-health'),
             ('simple', 'revoked'), ('narrow', 'sibling'), ('simple', 'lost-deploy-ack'),
@@ -25,14 +26,18 @@ FOCUSED += [('simple', 'returning'), ('narrow', 'compatible-build'), ('depth', '
 
 def scenarios(seed, count):
     pairs = list(FOCUSED)
+    exercised_warm = set()
     rng = random.Random(seed)
     while len(pairs) < count:
         block = [(mode, condition) for mode in MODES for condition in CONDITIONS]
         rng.shuffle(block)
         pairs.extend(block)
     for case, (mode, condition) in enumerate(pairs[:count], 1):
+        case_52_regression = seed == 271127 and case == 52
         case_65_regression = seed == 271127 and case == 65
         case_83_regression = seed == 271127 and case == 83
+        if case_52_regression:
+            mode, condition = 'simple', 'transient-health'
         if case_65_regression:
             mode, condition = 'depth', 'evicted-setup'
         if case_83_regression:
@@ -55,6 +60,11 @@ def scenarios(seed, count):
             plan['capabilityFaults'] = ['post-deploy', 'post-probe']
         if case_65_regression:
             plan['interruptSetupProbe'] = True
+        # The focused cases plus one complete shuffled block exercise every
+        # warm condition in each mode. Later occurrences run normally.
+        if condition in WARM_CONDITIONS and (case_52_regression or (mode, condition) not in exercised_warm):
+            plan['interruptWarmProbe'] = True
+            exercised_warm.add((mode, condition))
         yield plan
 
 
@@ -68,7 +78,7 @@ def _verdict(expected, observed):
         'compiled': True,
         'registrationAcknowledged': True,
         'coldProbeMadeWorkerRequests': False,
-        'localProofBefore': expected['scenario'] in ('returning', 'compatible-build', 'revoked', 'transient-health', 'endpoint-missing'),
+        'localProofBefore': expected['scenario'] in WARM_CONDITIONS,
         'nativeInput': None,
         'sourceAdmitted': True,
         'workerResponsive': expected['expected']['verified'],
@@ -103,11 +113,38 @@ def _verdict(expected, observed):
         })
     differences = [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
                    for name, value in checks.items() if actual.get(name) != value]
-    if 'capabilityFaults' in expected:
+    if expected['scenario'] in WARM_CONDITIONS:
         warm = observed.get('warmInitialization') or {}
-        probe = warm.get('probe') or {}
-        if warm.get('boundary') != 'verified' or probe.get('state') != 'verified':
-            differences.append({'predicate': 'warm probe verified', 'expected': True, 'actual': probe.get('state')})
+        initial = warm.get('probe') or {}
+        reconciled = warm.get('outcome') == 'reconciled'
+        proof = (warm.get('probeStatus') or {}) if reconciled else initial
+        receipt = proof.get('receipt') or {}
+        operation = warm.get('operationId')
+        proof_prefix = f"{expected['prefix']}.click2cloud-readiness/{operation}"
+        exact_scope = {'matchesScope': True, 'prefix': proof_prefix}
+        warm_checks = {
+            'warm initialization verified': warm.get('boundary') == 'verified',
+            'ordinary warm initialization': warm.get('experiment') == 'ordinary-initialization',
+            'one warm probe write': warm.get('probeWrites') == 1,
+            'warm content independently verified': proof.get('state') == 'verified'
+            and proof.get('code') == 'R2_READBACK_BYTES'
+            and proof.get('proofKind') == 'independent-get-byte-comparison',
+            'original warm operation': bool(operation) and proof.get('operationId') == receipt.get('operationId') == operation,
+            'exact warm scope and key': proof.get('destination') == receipt.get('destination') == exact_scope
+            and receipt.get('key') == f'{proof_prefix}/readiness.txt'
+            and receipt.get('size') == len(f'Click2Cloud readback {operation}'.encode('utf-8'))
+            and bool(receipt.get('etag')) and bool(receipt.get('version')),
+            'warm acknowledgment retained': (reconciled and initial.get('state') != 'verified')
+            or (warm.get('outcome') == 'verified' and initial.get('state') == 'verified'),
+        }
+        if expected.get('interruptWarmProbe'):
+            warm_checks['injected warm reply loss reconciled'] = (
+                warm.get('replyLossInjected') is True and reconciled
+                and initial.get('code') == 'READINESS_RECONCILE_REQUIRED'
+                and initial.get('operationId') == operation
+            )
+        differences.extend({'predicate': name, 'expected': True, 'actual': value}
+                           for name, value in warm_checks.items() if not value)
     return differences
 
 
@@ -233,7 +270,8 @@ def fixture(seed, count, selected, *, repository, timeout_seconds=None):
     summary = {'status': overall, 'seed': seed, 'revision': results.get('revision'),
                'sourceDigest': results.get('sourceDigest'), 'workerCodeDigest': results.get('workerCodeDigest'), 'extensionVersion': results.get('extensionVersion'),
                'protocol': results.get('protocol'), 'evidenceLayer': results.get('evidenceLayer'),
-               'platform': results.get('platform'), 'nodeVersion': results.get('nodeVersion'),
+               'platform': results.get('platform'), 'osRelease': results.get('osRelease'),
+               'arch': results.get('arch'), 'nodeVersion': results.get('nodeVersion'),
                'elapsedSeconds': elapsed, 'deadlineSeconds': timeout_seconds,
                'runnerExitCode': exit_code, 'stopCode': stop_code, 'lastActiveCase': active,
                'nativeInput': 'NOT_TESTED', 'liveProvider': 'NOT_TESTED', 'counts': {

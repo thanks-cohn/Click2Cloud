@@ -87,7 +87,7 @@ test('an uncertain readiness write is inspected on retry and never automatically
  assert.equal((await f.c.recoverDestination({target:child})).state,'uncertain');const writes=f.calls.filter(x=>['prepare','probe'].includes(x.kind)).length;
  assert.equal((await f.c.recoverDestination({target:child})).code,'SETUP_PROBE_REQUIRES_INSPECTION');assert.equal(f.calls.filter(x=>['prepare','probe'].includes(x.kind)).length,writes);assert(!f.calls.some(x=>x.kind==='mark'));
 });
-test('a lost readiness write reply continues the same save after bounded reads verify the persisted probe ID',async()=>{
+test('a lost readiness write reply reconciles the original probe while a second preparation waits',async()=>{
  const f=fixture();
  const reads=[];
  f.transport.probe=async x=>{
@@ -102,8 +102,9 @@ test('a lost readiness write reply continues the same save after bounded reads v
   if(reads.length===2)return {state:'uncertain',code:'READINESS_UNVERIFIED',operationId};
   return {state:'verified',operationId,receipt:{key:child.prefix+'proof'}};
  };
- const result=await f.c.ensureSaveReady(child);
+ const [result,second]=await Promise.all([f.c.ensureSaveReady(child),f.c.ensureSaveReady(child)]);
  assert.equal(result.code,'CLOUDFLARE_READY');
+ assert.equal(second.state,'completed');
  const probes=f.calls.filter(call=>call.kind==='probe');
  assert.equal(probes.length,1);
  assert.deepEqual(reads,Array(3).fill(probes[0].operationId));

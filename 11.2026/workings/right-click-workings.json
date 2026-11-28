@@ -9335,8 +9335,8 @@
       "src/cloudflare/file-transport.mjs": "db292cf710ec9da580888594e68e3db5059eb6ff11dd510f81302cac11268518",
       "src/cloudflare/files.mjs": "c4ae42b72be96a04c89f6c7d57cfb17e28a19fd8347b2d92ceefc6ce040122b2",
       "src/cloudflare/inventory.mjs": "6c503961e9e7738d1c96eb45eacb94d0c62060bc941d74f524eea458fce9c151",
-      "src/cloudflare/manifest-locations.mjs": "0ebd97a59c23a4dac5ace564d9a136d35f242ed65ab533cf083be0f6a86f1c88",
-      "src/cloudflare/onboarding.mjs": "40807ba3291d509b25cc3640445b16887e21bc29d75bf84dbd27d17b3b479aa3",
+      "src/cloudflare/manifest-locations.mjs": "6d08e7bf2579810b8228ae87ebc1786e0e2a03113adaff5bb69ff8419ba2b768",
+      "src/cloudflare/onboarding.mjs": "fa2092e958bfb2df1c3aa1946bfdec397176418a0d87d3261f04067f63e01cd3",
       "src/cloudflare/public-address.mjs": "f0d153e901707c88997e486d5f5c5caaeb10f22b33e62cd61234a3fdf069eb20",
       "src/cloudflare/public-egress.mjs": "f94ceab1436917373906b825f6970a7a808b5bba97ce4d255bd5dafa029ec68c",
       "src/cloudflare/r2-public-domains.mjs": "d774e02b55cf0e65e7d749bb0222d1f6490b44e434308fb9be5dba0d7f10dcec",
@@ -9344,7 +9344,7 @@
       "src/cloudflare/screenshot-direct-upload.mjs": "19c477f270be1b1b1de2afbfbc4b5113044f00ccc177611596dab929545a5ddd",
       "src/cloudflare/screenshot-wire.mjs": "0026483e1eec5b72daecdff5f8d28c08ffa16806ad4a56e64085f6816e1d90d0",
       "src/cloudflare/screenshot-worker.mjs": "f1ab47d33036675eb1c878aa9ee297c11ec93fd0812b1f0628df3c71310e57f3",
-      "src/cloudflare/transport.mjs": "8e2b89d97c03f30b146f32200eb9531954488081a514c1961b4c47234e91fa68",
+      "src/cloudflare/transport.mjs": "a6d48d3218315e79ec2d597eb5281a4944afd24d304d6a2c37a3184fba1507b8",
       "src/cloudflare/wire.mjs": "12a5a32d2846d215d97dc33d1ab1e88929f527c1a2d3d73de80ced903d128dd0",
       "src/cloudflare/worker.mjs": "5a1ea1ea1bad2f79845a6f80d83b4d2ffc7f5a3b4fd1e7e460df75e13d0fc57d",
       "src/cloudflare/writer-registry.mjs": "140cac665a60a952dbb730a88c3f31a0f0067b727be91adc1a307a98b077c401",
@@ -13614,7 +13614,14 @@
         "installedWindows": "NOT_VERIFIED"
       }
     },
-    "sourceState": "ReDown 0.3.32.6 through Part 2B.1 Case 65; exact source file hashes",
+    "sourceState": "ReDown 0.3.32.6 through Part 2B.1 shared readiness reconciliation; exact source file hashes",
+    "part2Case52": {
+      "owner": "reconcileReadinessProbe / createRemoteTransport",
+      "condition": "A readiness write reply is lost during approved setup, destination recovery, Explorer Default, reviewed manifest preparation or warm fixture initialization.",
+      "effect": "Inspect the original probe through the authenticated byte-readback path. Match the original identity and exact destination, and revalidate authorization before accepting proof. Explicit pre-dispatch rejection records noncompletion. An uncertain write remains fenced to read-only reconciliation.",
+      "regression": "part2-lab.cmd right-click --seed 271127 --case 52; --cases 44 covers all warm conditions across three modes",
+      "evidence": "11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/CASE_52_EVIDENCE.json"
+    },
     "part2Case65": {
       "owner": "recoverCloudflareDestination / createCloudflareOnboarding",
       "condition": "A readiness write reply is lost during an admitted save.",

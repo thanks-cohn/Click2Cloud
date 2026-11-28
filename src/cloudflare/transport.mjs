@@ -24,6 +24,18 @@ export function preparedDestination(plan,target){
   ?{state:'READY'}:{state:'PREPARED',code:'WRITE_PROOF_REQUIRED'};
 }
 
+function checkProbeProof(result,destination,operationId){
+ if(result.state!=='verified')return result;
+ const exact={...destination,prefix:[destination.prefix,'.click2cloud-readiness',operationId].filter(Boolean).join('/')};
+ const receipt=result.receipt;
+ const size=new TextEncoder().encode('Click2Cloud readback '+operationId).byteLength;
+ if(result.code==='R2_READBACK_BYTES'&&result.proofKind==='independent-get-byte-comparison'&&
+  result.operationId===operationId&&receipt?.operationId===operationId&&
+  equal(result.destination,exact)&&equal(receipt.destination,exact)&&receipt.key===exact.prefix+'/readiness.txt'&&
+  receipt.size===size&&typeof receipt.etag==='string'&&receipt.etag&&typeof receipt.version==='string'&&receipt.version)return result;
+ return {state:'uncertain',code:'READINESS_PROOF_MISMATCH',operationId,destination};
+}
+
 export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fetch,authorizeSource=async()=>true,verifyAuthority=async()=>true,clock=Date.now,record=async()=>{},pollIntervalMs=1000,expectedCodeDigest=null}){
  // Per-gesture capability evidence, never persisted or shared across clicks.
  // Fresh OAuth, plan, prefix and verifyAuthority checks still run before each use.
@@ -332,8 +344,17 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
      /^[A-Z][A-Z0-9_]+$/.test(error.code??'')?error.code:'TRANSPORT_UNAVAILABLE',operationId};
    }
   },
-  async probe({target,operationId=crypto.randomUUID(),authorize=async()=>true}){if(!await authorize())return {state:'blocked',code:'AUTHORIZATION_DENIED'};const c=await cap(target,{use:'probe',operationId});let result;try{result=await post(c,'/probe',{});}catch{return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId,destination:remoteDestination(target)};}if(!await recheck(c,target)||!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
-  async probeStatus(target,operationId,{signal}={}){const c=await cap(target),result=await post(c,'/probe-status',{operationId},signal);if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
+  async probe({target,operationId=crypto.randomUUID(),authorize=async()=>true}){
+   let c;
+   try{if(!await authorize())fail('AUTHORIZATION_DENIED');c=await cap(target,{use:'probe',operationId});}
+   catch(error){return {state:'blocked',code:/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'WORKER_NOT_READY',operationId,preDispatch:true};}
+   let result;
+   try{result=await post(c,'/probe',{});}catch{return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId,destination:c.destination};}
+   try{if(!await recheck(c,target,{matchPlan:true})||!await authorize())fail('AUTHORIZATION_LOST');}
+   catch{return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId,destination:c.destination};}
+   return checkProbeProof(result,c.destination,operationId);
+  },
+  async probeStatus(target,operationId,{signal}={}){const c=await cap(target),result=await post(c,'/probe-status',{operationId},signal);if(!await recheck(c,target,{matchPlan:true}))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return checkProbeProof(result,c.destination,operationId);},
   async cancel(target,operationId){
    const job=activeSaves.get(operationId);
    if(job&&equal(remoteDestination(job.target),remoteDestination(target)))return requestJobCancel(job,operationId);

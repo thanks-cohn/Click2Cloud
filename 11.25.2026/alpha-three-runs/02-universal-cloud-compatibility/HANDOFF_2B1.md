@@ -132,3 +132,22 @@ call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd 
 Checkpoint 2B.1 remains open for the full reference Windows campaign and the existing installed-browser and live-provider gates.
 
 Hosted Windows CI on `4eeab1fd4782abde6560797974502a8663747c2a` passed both Case 65 and Case 83 and verified that a deadline retains completed cases. The Linux campaign passed 100/100, and the full JavaScript suite passed 887/887. [Windows receipts](https://github.com/thanks-cohn/Click2Cloud/actions/runs/46106925134/artifacts/15248126204)
+
+### Case 52 and the shared readiness failure class
+
+The owner recorded 99 PASS, 1 FAIL and 0 NOT_TESTED on reference Windows at `d990337`. Both Cases 65 and 83 passed. Case 52, Simple / transient-health, lost its initial warm `/probe` reply to an uninjected `ECONNRESET` after 137 ms. The next `/probe-status` returned HTTP 200 with `R2_READBACK_BYTES`, the independent byte comparison, and the original probe ID and scope. The fixture still required a verified initial reply and halted before scenario dispatch. The archived baseline deterministically reproduces that failure by dropping the reply after the same real local write. [Evidence](CASE_52_EVIDENCE.json)
+
+`reconcileReadinessProbe` now owns the verified, rejected-before-write and uncertain outcomes across approved account setup, destination recovery, Explorer Default, reviewed manifest preparation and ordinary fixture initialization. Each path retains its existing ledger, authority and exact target. Readback requires the signed plan and checks both copies of the operation and scope, the exact key, the expected size and storage evidence. Three bounded reads may verify uncertainty. An explicit pre-write rejection records noncompletion, while missing or unavailable readback retains uncertainty without resubmitting the write. Customer save publication continues through the existing independent operation status and verification path. [Engine and API documentation](../../../latest/right-click-rules/ENGINE-AND-API-DOCUMENTATION.md)
+
+Hosted Windows now runs the 44-case qualification covering all 30 mode and scenario combinations, the three pinned cases, and both dedicated warm failure controls. Ordinary warm initialization retains the original reply and read-only evidence. The failure controls still stop before scenario dispatch, including the control where independent readback succeeds. Concurrent callers, revoked grants, returning configurations, transport interruptions, and unverified publication are covered by the existing scenarios and focused tests. [Evidence](CASE_52_EVIDENCE.json)
+
+Cloudflare documents Miniflare as a local Workerd runtime. The pinned Miniflare implementation dispatches to a pool keyed by loopback origin. Case 52 ran before any fixture retirement and read back bytes from the same runtime. Case 65 recreates the extension-side host during preparation and keeps the Workerd runtime. These observations establish where the replies were lost and rule out intentional Workerd retirement as a required step. They leave socket reuse, the peer closing the connection and environment-specific influences unresolved. [Cloudflare local development](https://developers.cloudflare.com/workers/local-development/)
+
+Each probe receipt now records the runtime ordinal and age, the socket ordinal and previous route when available, response status, error and cause codes, and relative times of runtime disposal and sanitized reset warnings. For an uninjected reset, compare the failed request with the next status read and the runtime retirement and warning times in `observations.json`. Keep `fixture.log`, `progress.ndjson` and `summary.json` from that same run. If a restart can be observed, compare the runtime ordinal and stderr timing. First-use and reused sockets are distinguishable by the socket request ordinal. [Evidence](CASE_52_EVIDENCE.json)
+
+```cmd
+call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --case 52 --timeout-seconds 90
+call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --cases 100
+```
+
+Checkpoint 2B.1 remains open for the reference Windows campaign and the existing installed-browser, authorized live first-use and inherited acceptance gates.

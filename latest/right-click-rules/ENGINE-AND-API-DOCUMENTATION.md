@@ -1198,3 +1198,27 @@ Verified bytes under the original probe ID allow the normal authenticated
 `READY` gate and original save to continue. An explicit pre-write rejection
 records noncompletion. Missing readback leaves the existing probe uncertain,
 since the first write can still be in flight. No automatic probe replay occurs.
+
+### Shared readiness proof and Laboratory warm initialization
+
+Approved account setup, destination recovery, Explorer Default, reviewed
+manifest preparation and ordinary Laboratory warm initialization use the same
+bounded reconciliation in `reconcileReadinessProbe`. Each owner retains its own
+operation identity, authorization checks and existing ledger. The account and
+destination preparation paths use the same bucket lock to serialize work for
+that bucket. A request that was rejected before writing may be retried through
+its authorized setup path. A write with an uncertain outcome stays fenced to
+read-only status for the original probe ID. Unavailable or absent readback
+leaves it unresolved, including after an extension restart. A verified result
+requires the signed plan, the exact account/bucket/prefix and probe key, the
+original ID in the response and receipt, and the Worker’s independent byte
+comparison. The caller revalidates authorization before accepting proof. The
+existing authenticated capability check remains the dispatch gate for a save.
+
+Ordinary warm initialization retains the original reply and later readback in
+the same receipt. Each warm condition has a deterministic lost-response replay
+through the real local Workerd/R2 path in Simple, Narrow and Depth. The dedicated
+initialization failure experiments still fail before scenario dispatch. Case
+65 still exercises an interrupted setup probe during a save, and Case 83
+still exercises the endpoint replacement and capability retry. User publication
+uses its existing operation status and receipt reconciliation.
