@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash,randomUUID} from 'node:crypto';
-import {readFile,writeFile} from 'node:fs/promises';
+import {appendFile,readFile,rename,writeFile} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {setTimeout as delay} from 'node:timers/promises';
@@ -32,7 +32,8 @@ const safeCode=(error,fallback='FIXTURE_ASSERTION_FAILED')=>/^[A-Z][A-Z0-9_]{1,7
 const safeTransportError=error=>({
  type:['Error','TypeError','AbortError','TimeoutError','SocketError','MiniflareCoreError'].includes(error?.name)?error.name:null,
  code:safeCode(error,null),causeCode:safeCode(error?.cause,null),
- errno:Number.isInteger(error?.cause?.errno)?error.cause.errno:Number.isInteger(error?.errno)?error.errno:null
+ errno:Number.isInteger(error?.cause?.errno)?error.cause.errno:Number.isInteger(error?.errno)?error.errno:null,
+ syscall:['read','write','recv','send','connect','WSARecv','WSASend'].find(name=>name===(error?.cause?.syscall??error?.syscall))??null
 });
 
 function probeEvidence(result,target,operationId){
@@ -71,18 +72,35 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
  const outcome={evidenceLayer:'paired-python/native-loopback-production-registrar-signed-workerd-r2',
   revision:buildInfo.revision,sourceDigest:buildInfo.sourceDigest,workerCodeDigest:deployedDigest,
   extensionVersion:buildInfo.extensionVersion,protocol:'1.0.0',platform:process.platform,nodeVersion:process.versions.node,cases:[]};
- const save=()=>writeFile(join(dirname(manifestPath),'observations.json'),JSON.stringify(outcome,null,2)+'\n');
- for(const scenario of manifest.cases){
+ const directory=dirname(manifestPath),snapshot=join(directory,'observations.json'),temporary=snapshot+'.tmp';
+ const save=async()=>{
+  await writeFile(temporary,JSON.stringify(outcome,null,2)+'\n');
+  await rename(temporary,snapshot);
+ };
+ const campaignStarted=performance.now();
+ const progress=event=>appendFile(join(directory,'progress.ndjson'),JSON.stringify({
+  elapsedMs:Math.round(performance.now()-campaignStarted),...event
+ })+'\n');
+ await save();
+ for(const [index,scenario] of manifest.cases.entries()){
+  const started=performance.now();
+  const report=async(phase,status)=>progress({
+   ordinal:index+1,total:manifest.cases.length,case:scenario.case,mode:scenario.mode,scenario:scenario.scenario,
+   phase,status,caseElapsedMs:Math.round(performance.now()-started)
+  });
   const fixture={phase:'fixture-initialization',warmInitialization:null,fixtureTransport:[]};
-  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixture),...fixture});}
+  await report('fixture-initialization','RUNNING');
+  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixture,report),...fixture});}
   catch(error){
    outcome.cases.push({case:scenario.case,status:'FAIL',code:safeCode(error),errorType:error.name,location:String(error.stack).split('\n').find(line=>line.includes('right-click-lab.mjs'))?.trim().replace(/^.*right-click-lab.mjs:/,'right-click-lab.mjs:'),...fixture});
   }
+  outcome.cases.at(-1).elapsedMs=Math.round(performance.now()-started);
   await save();
+  await report('case-complete',outcome.cases.at(-1).status);
  }
  return outcome.cases.every(item=>item.status==='OBSERVED');
 
- async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[],warmProbeFault},fixture){
+ async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[],warmProbeFault,interruptSetupProbe=false},fixture,report){
   const {fixtureTransport}=fixture;
   assert(['simple','nested','depth'].includes(mode));
   const root={provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''};
@@ -94,6 +112,8 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
   const current=createCurrentStore({dbName:'right-click-fixture-'+randomUUID()});
   const plans=new Map(),runtimes=new Map(),allWorkers=new Set();
   const injectedFaults=[],admissions=[],submissions=[];
+  const probeStatusIds=[];
+  let interruptedProbeId=null;
   let activeAuth='fixture-login',registrar,lab,engine,cloudflare,trace,preparedOptions;
   let publicationRequests=0,deployments=0,workerRequests=0,healthFailures=0,readinessProbeRequests=0,peakLocalRuntimes=0;
   let lostAck=0,settingsMissing=0,setupBlocked=false,armTransient=false,grantDenied=false;
@@ -158,8 +178,11 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
      const worker=runtimes.get(hostname.split('.')[0]);
      if(!worker)return new Response(null,{status:404});
      const warm=fixture.phase==='fixture-initialization'?fixture.warmInitialization:null;
-     const phase=warm?'warm-initialization':pathname==='/capabilities'?(deployments===0?'retained':readinessProbeRequests?'post-probe':'post-deploy'):null;
+     const phase=warm?'warm-initialization':pathname==='/capabilities'?(deployments===0?'retained':readinessProbeRequests?'post-probe':'post-deploy'):
+      pathname==='/probe'?'readiness-probe':pathname==='/probe-status'?'readiness-reconciliation':null;
      if(pathname==='/probe')readinessProbeRequests++;
+     if(pathname==='/probe-status'&&!warm)probeStatusIds.push(JSON.parse(options.body).operationId);
+     if(phase==='readiness-probe'||phase==='readiness-reconciliation')await report(phase,'RUNNING');
      const started=performance.now();
      let injected=false;
      try{
@@ -181,9 +204,16 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
        injected=true;
        throw Object.assign(new TypeError('Fixture lost the warm probe response'),{cause:{code:'ECONNRESET'}});
       }
+      if(interruptSetupProbe&&phase==='readiness-probe'&&!interruptedProbeId){
+       const written=await response.json();
+       assert.equal(written.state,'verified');
+       interruptedProbeId=written.operationId;
+       injected=true;
+       throw Object.assign(new TypeError('Fixture lost the verified setup probe response'),{cause:{code:'ECONNRESET'}});
+      }
       return response;
      }catch(error){
-      fixtureTransport.push({boundary:'workerd-dispatch',route:pathname,phase,deployment:deployments,
+      fixtureTransport.push({boundary:'workerd-dispatch',transport:'local-workerd-loopback',route:pathname,phase,deployment:deployments,
        durationMs:Math.round(performance.now()-started),injected,...safeTransportError(error)});
       throw error;
      }
@@ -212,6 +242,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    startHost();
    const needsWarm=['returning','compatible-build','transient-health','revoked','endpoint-missing'].includes(scenario);
    if(needsWarm){
+    await report('warm-initialization','RUNNING');
     // Seed only the explicitly returning/fault scenarios. Cold first-use
     // cases start with no retained plan, no provider worker and no proof.
     const warm=fixture.warmInitialization={
@@ -256,6 +287,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     }
    }
    fixture.phase='scenario';
+   await report('menu-registration','RUNNING');
 
    // Plain registration still uses the actual CURRENT/engine API. Explicitly
    // approved first-use setup can begin once the reconciled route is exposed.
@@ -271,6 +303,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    if(['returning','evicted-setup'].includes(scenario)){
     assert.equal((await registration).data.native.state,'completed');
     if(scenario==='evicted-setup'){
+     await report('evicted-setup','RUNNING');
      const interrupted=await cloudflare.recoverDestination({target:exact});
      assert.equal(interrupted.code,'TRANSIENT_API_FAILURE');
      assert.equal((await preparedOptions.provisioner.lookup(exact)).state,'pending');
@@ -287,6 +320,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    const config=await current.read();
    const modes=Object.keys(config.configs).filter(key=>(config.configs[key].destinations??config.configs[key].scopes).length);
    const inspectedBefore=workerRequests;
+   await report('native-pairing','RUNNING');
    lab=createPythonLab({runtime,storage,build:{...buildInfo,labEvidenceClass:outcome.evidenceLayer},
     authority:oauth.authority,permission:async()=>true,opfsCapability:()=>true,buckets:async()=>({buckets:[{name:bucketName}]}),
     checkBucket:async()=>true,checkUpload:async()=>{throw Error('READ_ONLY_PROBE_MUST_NOT_PREWARM');},
@@ -299,6 +333,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    const cold=await cli(argumentsFor);
    const coldProbeMadeWorkerRequests=workerRequests!==inspectedBefore;
    if(scenario==='revoked')grantDenied=true;
+   await report('save-readiness-and-dispatch','RUNNING');
    const submitted=registrar.handleClick({menuItemId:row.id,linkUrl:mainURL});
    let secondary,scenarioExercised=true;
    if(scenario==='registration-race'){
@@ -311,6 +346,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     else secondary=registrar.handleClick({menuItemId:row.id,linkUrl:secondURL});
    }
    const [result,second]=await Promise.all([submitted,secondary]);
+   await report('independent-readback','RUNNING');
    if(secondary)assert.equal(second.completion,'verified');
    const registered=await registration;
    assert.equal(registered.data?.native?.state,'completed',JSON.stringify(registered));
@@ -344,6 +380,8 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     key:object?.key??null,sha256:object?sha(await object.arrayBuffer()):null,
     manualIntervention:read.observations.manualIntervention.observed,code:result.code??null,
     capabilityFaults:injectedFaults,peakLocalRuntimes,readinessProbeRequests,originalOperationVerified,
+    ...(interruptSetupProbe?{interruptedProbeId,probeStatusIds,
+     originalProbeReconciled:!!(interruptedProbeId&&probeStatusIds.length>0&&probeStatusIds.every(id=>id===interruptedProbeId))}:{}),
     firstFailedBoundary:read.attempt?.firstFailedBoundary??null,initialHealthCode:firstHealth?.code??null,
     operationId:result.remoteOperationId??result.operationId??null
    }};

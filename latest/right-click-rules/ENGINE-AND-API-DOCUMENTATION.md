@@ -1187,3 +1187,14 @@ one readiness probe, one exact publication under the initially admitted
 operation ID and a matching independently reopened SHA-256. The fixture shuts
 down the old local runtime before starting its replacement and records safe
 startup or dispatch error codes separately from the production verdict.
+
+### Case 65 interrupted readiness write during evicted setup
+
+`recoverCloudflareDestination` retains the setup probe ID before dispatch. When
+the reply is uncertain, the active save invokes the same `/probe-status` read
+used when resuming the ledger. It makes at most three reads, with a 2.5-second
+request timeout per read and authority and exact scope checks around each read.
+Verified bytes under the original probe ID allow the normal authenticated
+`READY` gate and original save to continue. An explicit pre-write rejection
+records noncompletion. Missing readback leaves the existing probe uncertain,
+since the first write can still be in flight. No automatic probe replay occurs.

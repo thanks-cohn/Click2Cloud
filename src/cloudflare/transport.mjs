@@ -333,7 +333,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
    }
   },
   async probe({target,operationId=crypto.randomUUID(),authorize=async()=>true}){if(!await authorize())return {state:'blocked',code:'AUTHORIZATION_DENIED'};const c=await cap(target,{use:'probe',operationId});let result;try{result=await post(c,'/probe',{});}catch{return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId,destination:remoteDestination(target)};}if(!await recheck(c,target)||!await authorize())return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
-  async probeStatus(target,operationId){const c=await cap(target),result=await post(c,'/probe-status',{operationId});if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
+  async probeStatus(target,operationId,{signal}={}){const c=await cap(target),result=await post(c,'/probe-status',{operationId},signal);if(!await recheck(c,target))return {state:'uncertain',code:'AUTHORIZATION_LOST',operationId};return result;},
   async cancel(target,operationId){
    const job=activeSaves.get(operationId);
    if(job&&equal(remoteDestination(job.target),remoteDestination(target)))return requestJobCancel(job,operationId);

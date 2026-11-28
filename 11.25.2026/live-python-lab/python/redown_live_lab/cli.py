@@ -150,6 +150,7 @@ def parse(argv):
     click_test.add_argument('--seed', type=int, default=271127)
     click_test.add_argument('--cases', type=integer_flag(300), default=len(FOCUSED))
     click_test.add_argument('--case', type=integer_flag(300), help='Replay one case from the same seed.')
+    click_test.add_argument('--timeout-seconds', type=integer_flag(7200), help='Override the total local fixture deadline.')
     plan = commands.add_parser('validate', aliases=['plan'], help='Validate a workload and do a read-only preflight.')
     execution_options(plan)
     execute = commands.add_parser('run', help='Plan or execute a manifest.')
@@ -392,7 +393,7 @@ def main(argv=None):
             return 0
 
         if args.command == 'right-click-fixture':
-            result = right_click_fixture(args.seed, args.cases, args.case, repository=Path.cwd())
+            result = right_click_fixture(args.seed, args.cases, args.case, repository=Path.cwd(), timeout_seconds=args.timeout_seconds)
             output(result)
             return EXIT_CODES[result['status']]
         if args.command == 'right-click-inspect':

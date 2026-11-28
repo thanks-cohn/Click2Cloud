@@ -87,6 +87,47 @@ test('an uncertain readiness write is inspected on retry and never automatically
  assert.equal((await f.c.recoverDestination({target:child})).state,'uncertain');const writes=f.calls.filter(x=>['prepare','probe'].includes(x.kind)).length;
  assert.equal((await f.c.recoverDestination({target:child})).code,'SETUP_PROBE_REQUIRES_INSPECTION');assert.equal(f.calls.filter(x=>['prepare','probe'].includes(x.kind)).length,writes);assert(!f.calls.some(x=>x.kind==='mark'));
 });
+test('a lost readiness write reply continues the same save after bounded reads verify the persisted probe ID',async()=>{
+ const f=fixture();
+ const reads=[];
+ f.transport.probe=async x=>{
+  f.calls.push({kind:'probe',operationId:x.operationId});
+  return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId:x.operationId};
+ };
+ f.transport.probeStatus=async(target,operationId,{signal})=>{
+  assert.deepEqual(target,child);
+  assert(signal instanceof AbortSignal);
+  reads.push(operationId);
+  if(reads.length===1)throw Object.assign(Error('Connection reset'),{code:'TRANSPORT_UNAVAILABLE'});
+  if(reads.length===2)return {state:'uncertain',code:'READINESS_UNVERIFIED',operationId};
+  return {state:'verified',operationId,receipt:{key:child.prefix+'proof'}};
+ };
+ const result=await f.c.ensureSaveReady(child);
+ assert.equal(result.code,'CLOUDFLARE_READY');
+ const probes=f.calls.filter(call=>call.kind==='probe');
+ assert.equal(probes.length,1);
+ assert.deepEqual(reads,Array(3).fill(probes[0].operationId));
+ assert.equal(result.operationId,probes[0].operationId);
+});
+test('an explicit pre-write rejection records noncompletion while absent readback stays uncertain',async()=>{
+ for(const preWriteRejected of [true,false]){
+  const f=fixture(),reads=[];
+  f.transport.probe=async ({operationId})=>preWriteRejected
+   ?{state:'blocked',code:'CAPABILITY_DENIED',operationId}
+   :{state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId};
+  f.transport.probeStatus=async(_target,operationId)=>{
+   reads.push(operationId);
+   return {state:'uncertain',code:'READINESS_UNVERIFIED',operationId};
+  };
+  const result=await f.c.ensureSaveReady(child);
+  assert.equal(result.state,preWriteRejected?'blocked':'uncertain');
+  const setup=[...f.records.values()].find(row=>row.operationId===result.operationId);
+  assert.equal(setup.stage,preWriteRejected?'worker-prepared':'probe-dispatched');
+  assert.equal(setup.probeOutcome,preWriteRejected?'not-written':'uncertain');
+  assert.deepEqual(reads,preWriteRejected?[]:Array(3).fill(result.operationId));
+  assert(!f.calls.some(call=>call.kind==='mark'));
+ }
+});
 test('legacy exact-bucket initialization probe is resumed read-only without borrowing Narrow A setup',async()=>{
  const f=fixture();f.plans.set('b',{state:'ready',prefixScope:''});f.records.set('initialization:a',{idempotencyKey:'legacy-b'});f.records.set('a:legacy-b',{accountId:'a',target:child,stage:'probe-dispatched',operationId:'legacy-b-probe'});
  assert.equal((await f.c.recoverDestination({target:child})).code,'CLOUDFLARE_READY');assert(!f.calls.some(x=>['prepare','probe'].includes(x.kind)));assert.equal(f.calls.find(x=>x.kind==='probe-status').operationId,'legacy-b-probe');

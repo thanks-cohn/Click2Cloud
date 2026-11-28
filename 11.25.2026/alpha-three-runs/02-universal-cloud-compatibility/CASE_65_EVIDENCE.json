@@ -1,0 +1,211 @@
+{
+  "schema": "redown.case-65-evidence/1",
+  "checkpointStatus": "OPEN_PENDING_REFERENCE_WINDOWS_VERIFICATION",
+  "ownerWindows": {
+    "provenance": "Owner report. The raw reference Windows receipt was unavailable in this workspace.",
+    "revision": "c644643b538d3addaa211e072fcc8ed210464fcc",
+    "seed": 271127,
+    "counts": {
+      "PASS": 99,
+      "FAIL": 1,
+      "NOT_TESTED": 0
+    },
+    "case83": "PASS",
+    "case65": {
+      "case": 65,
+      "mode": "depth",
+      "scenario": "evicted-setup",
+      "code": "READINESS_RECONCILE_REQUIRED",
+      "route": "/probe",
+      "causeCode": "ECONNRESET",
+      "errno": -4077,
+      "durationMs": 220,
+      "injected": false,
+      "deployments": 1,
+      "publicationRequests": 0,
+      "dispatched": false
+    }
+  },
+  "localBaselineControl": {
+    "label": "Archived baseline production with the new deterministic fault fixture",
+    "case": {
+      "case": 65,
+      "status": "FAIL",
+      "phase": "scenario",
+      "actual": {
+        "accountAuthorized": true,
+        "capabilityFaults": [],
+        "code": "READINESS_RECONCILE_REQUIRED",
+        "coldProbeMadeWorkerRequests": false,
+        "compiled": true,
+        "deployments": 1,
+        "dispatched": false,
+        "firstFailedBoundary": "worker.health",
+        "initialHealthCode": "WORKER_SETUP_REQUIRED",
+        "interruptedProbeId": "ec382881-840e-42d0-8132-70c7e20f9c59",
+        "isolatedMode": "depth",
+        "key": null,
+        "localProofBefore": false,
+        "manualIntervention": null,
+        "nativeInput": null,
+        "objectCount": 0,
+        "operationId": "7e33c618-83de-46d1-b763-e5fa416c5f51",
+        "originalOperationVerified": false,
+        "originalProbeReconciled": false,
+        "outsideScopeDenied": true,
+        "peakLocalRuntimes": 1,
+        "probeStatusIds": [],
+        "publicationRequests": 0,
+        "publicationVerified": null,
+        "readinessProbeRequests": 1,
+        "registrationAcknowledged": true,
+        "scenarioExercised": true,
+        "sha256": null,
+        "sourceAdmitted": true,
+        "verified": false,
+        "workerResponsive": false
+      },
+      "fixtureTransport": [
+        {
+          "boundary": "workerd-dispatch",
+          "causeCode": "ECONNRESET",
+          "code": null,
+          "deployment": 1,
+          "durationMs": 17,
+          "errno": null,
+          "injected": true,
+          "phase": "readiness-probe",
+          "route": "/probe",
+          "syscall": null,
+          "transport": "local-workerd-loopback",
+          "type": "TypeError"
+        }
+      ],
+      "differences": [
+        {
+          "actual": false,
+          "expected": true,
+          "predicate": "workerResponsive"
+        },
+        {
+          "actual": false,
+          "expected": true,
+          "predicate": "dispatched"
+        },
+        {
+          "actual": null,
+          "expected": true,
+          "predicate": "publicationVerified"
+        },
+        {
+          "actual": 0,
+          "expected": 1,
+          "predicate": "publicationRequests"
+        },
+        {
+          "actual": 0,
+          "expected": 1,
+          "predicate": "objectCount"
+        },
+        {
+          "actual": false,
+          "expected": true,
+          "predicate": "verified"
+        },
+        {
+          "actual": null,
+          "expected": "qa/folder/depth-065.txt",
+          "predicate": "key"
+        },
+        {
+          "actual": null,
+          "expected": "cc106eb805c51ea49bff8474976c195851286feb87c9d9b5b1a1821ea6e6e42d",
+          "predicate": "sha256"
+        },
+        {
+          "actual": null,
+          "expected": false,
+          "predicate": "manualIntervention"
+        },
+        {
+          "actual": false,
+          "expected": true,
+          "predicate": "originalProbeReconciled"
+        },
+        {
+          "actual": false,
+          "expected": true,
+          "predicate": "originalOperationVerified"
+        }
+      ]
+    }
+  },
+  "localRepairSmoke": {
+    "label": "Working-tree repair before commit",
+    "case": {
+      "case": 65,
+      "status": "PASS",
+      "phase": "scenario",
+      "actual": {
+        "accountAuthorized": true,
+        "capabilityFaults": [],
+        "code": "R2_HEAD_VERSION_SIZE",
+        "coldProbeMadeWorkerRequests": false,
+        "compiled": true,
+        "deployments": 1,
+        "dispatched": true,
+        "firstFailedBoundary": "worker.health",
+        "initialHealthCode": "WORKER_SETUP_REQUIRED",
+        "interruptedProbeId": "53551341-111d-419e-acdd-d127283fdc4e",
+        "isolatedMode": "depth",
+        "key": "qa/folder/depth-065.txt",
+        "localProofBefore": false,
+        "manualIntervention": false,
+        "nativeInput": null,
+        "objectCount": 1,
+        "operationId": "48fb6657-6774-4173-952c-b9c6581eec2d",
+        "originalOperationVerified": true,
+        "originalProbeReconciled": true,
+        "outsideScopeDenied": true,
+        "peakLocalRuntimes": 1,
+        "probeStatusIds": [
+          "53551341-111d-419e-acdd-d127283fdc4e"
+        ],
+        "publicationRequests": 1,
+        "publicationVerified": true,
+        "readinessProbeRequests": 1,
+        "registrationAcknowledged": true,
+        "scenarioExercised": true,
+        "sha256": "cc106eb805c51ea49bff8474976c195851286feb87c9d9b5b1a1821ea6e6e42d",
+        "sourceAdmitted": true,
+        "verified": true,
+        "workerResponsive": true
+      },
+      "fixtureTransport": [
+        {
+          "boundary": "workerd-dispatch",
+          "causeCode": "ECONNRESET",
+          "code": null,
+          "deployment": 1,
+          "durationMs": 23,
+          "errno": null,
+          "injected": true,
+          "phase": "readiness-probe",
+          "route": "/probe",
+          "syscall": null,
+          "transport": "local-workerd-loopback",
+          "type": "TypeError"
+        }
+      ],
+      "differences": []
+    }
+  },
+  "transportAssessment": "The fixture forwards /probe to the local Miniflare Workerd loopback. The underlying peer or OS event that caused the reference reset and the original probe outcome were not observed.",
+  "campaignReceipts": [
+    "scenario-plan.json",
+    "progress.ndjson",
+    "observations.json",
+    "fixture.log",
+    "summary.json"
+  ]
+}

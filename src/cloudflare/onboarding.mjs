@@ -14,6 +14,7 @@ import {passiveObservation} from '../core/boundary-observation.mjs';
 
 const transientWorkerCodes=new Set(['TRANSPORT_UNAVAILABLE','RESPONSE_INVALID','WORKER_UNAVAILABLE','TRANSIENT_API_FAILURE']);
 const propagatingWorkerCodes=new Set([...transientWorkerCodes,'WORKER_ENDPOINT_MISSING','WORKER_BUILD_MISMATCH']);
+const probeRejectedBeforeWrite=new Set(['AUTHORIZATION_DENIED','AUTHORIZATION_REVOKED','CAPABILITY_DENIED','BINDING_MISMATCH','OPERATION_INVALID','ROUTE_DENIED']);
 export function createCloudflareOnboarding({current,oauth,provisioner,transport,inspectBucket,openShelf=async()=>{},readRequestedTarget=async()=>null,record=async()=>{},history=async()=>[]}){
  const setupApproved=async accountId=>{const a=await current.readSetupOperation?.('approval:'+accountId);return a?.accountId===accountId&&a.approved===true;};
  // recoverCloudflareDestination: a clicked Depth child is owned by its saved
@@ -319,6 +320,19 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
   if(!Array.isArray(auth.scopes)||missing.length)return blocked('INSUFFICIENT_SCOPE',{diagnostic:{code:'INSUFFICIENT_SCOPE',missingScopes:missing}});
   const pointerKey='destination-recovery:'+bucketKey;let pointer=await current.readSetupOperation(pointerKey);
   let existing=pointer&&await current.readSetupOperation(accountId+':'+pointer.idempotencyKey);
+  async function inspectProbe(probeTarget,operationId,revalidate){
+   for(let attempt=0;attempt<3;attempt++){
+    await revalidate();
+    let result;
+    try{result=await transport.probeStatus(probeTarget,operationId,{signal:AbortSignal.timeout(2500)});}
+    catch(error){if(!transientWorkerCodes.has(error.code))throw error;result={code:error.code};}
+    await revalidate();
+    if(result.state==='verified'&&result.operationId===operationId)return result;
+    // A missing object can still have a write in flight. Only retry the read.
+    if(attempt===2||!transientWorkerCodes.has(result.code)&&!['READINESS_UNVERIFIED','SERVICE_UNAVAILABLE'].includes(result.code))return null;
+    await new Promise(resolve=>setTimeout(resolve,150*2**attempt));
+   }
+  }
   async function reconcileOtherPrefixProbe(pending,pendingPointer){
    const probeTarget=normalizeTarget(pending.target),probeScope=configuredScope(s,probeTarget),operationId=pending.operationId;
    if(!probeScope||typeof operationId!=='string'||!operationId)return blocked('PROVISION_RECONCILE_REQUIRED',{setupTarget:probeTarget});
@@ -329,14 +343,14 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     if(!clickedScope||targetKey(clickedScope)!==targetKey(scope)||!originalScope||targetKey(originalScope)!==targetKey(probeScope)||!await destinationApproved(target)||!await destinationApproved(probeTarget))fail('DESTINATIONS_CHANGED_DURING_SETUP');
    };
    try{
-    await stillAuthorized();const probe=await transport.probeStatus(probeTarget,operationId);await stillAuthorized();
-    if(probe.state!=='verified')return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,probeTarget,operationId};
+    const probe=await inspectProbe(probeTarget,operationId,stillAuthorized);
+    if(!probe)return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,probeTarget,operationId};
     await provisioner.markVerified(probeTarget,auth.sessionId);await stillAuthorized();
     const originalReadiness=await readWorkerStatus(probeTarget,stillAuthorized);await stillAuthorized();
     const readiness=await readWorkerStatus(target,stillAuthorized);await stillAuthorized();
     if(originalReadiness.state!=='READY'||readiness.state!=='READY')return blocked(readiness.code??originalReadiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness',probeTarget,operationId});
     const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,probeTarget,readiness,probe:probe.receipt,operationId,resumed:true};
-    await current.writeSetupOperation(accountId+':'+pendingPointer.idempotencyKey,{...pending,stage:'complete',result:{...result,target:probeTarget,readiness:originalReadiness}});
+    await current.writeSetupOperation(accountId+':'+pendingPointer.idempotencyKey,{...pending,stage:'complete',probeOutcome:'verified',result:{...result,target:probeTarget,readiness:originalReadiness}});
     readyCache.clear();return result;
    }catch(error){return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:/^[A-Z_]+$/.test(error.code??'')?error.code:'PROBE_RECONCILIATION_UNCONFIRMED',accountId,target,probeTarget,operationId};}
   }
@@ -384,8 +398,8 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
    await stillSelected();
    let probe;
    if(prior?.stage==='probe-dispatched'){
-    probe=await transport.probeStatus(target,prior.operationId);
-    if(probe.state!=='verified')return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,operationId:prior.operationId};
+    probe=await inspectProbe(target,prior.operationId,stillSelected);
+    if(!probe)return {state:'uncertain',code:'SETUP_PROBE_REQUIRES_INSPECTION',accountId,target,operationId:prior.operationId};
    }else{
     if(!prior)await progress('approved');
     // Preserve a retained scope. A missing plan uses its configured scope;
@@ -405,17 +419,26 @@ export function createCloudflareOnboarding({current,oauth,provisioner,transport,
     await stillSelected();
     const capability=await readWorkerStatus(expandScope?{...target,prefix:''}:target,stillSelected,{afterDeploy:true});
     if(!['READY','PREPARED'].includes(capability.state))return blocked(capability.code??'WORKER_NOT_READY',{stage:'worker-capability'});
-    const operationId=prior?.operationId??crypto.randomUUID();await stillSelected();await progress('probe-dispatched',{operationId});
+    const operationId=prior?.operationId??crypto.randomUUID();await stillSelected();await progress('probe-dispatched',{operationId,probeOutcome:'uncertain'});
     probe=await transport.probe({target,operationId,authorize:async()=>{try{return await stillSelected();}catch{return false;}}});
     try{void Promise.resolve(record({...probe,kind:'readiness'})).catch(()=>{});}catch{}
-    if(probe.state!=='verified')return {state:probe.state==='uncertain'?'uncertain':'blocked',code:probe.code??'READINESS_WRITE_UNVERIFIED',accountId,target,operationId};
+    if(probe.state==='blocked'&&probeRejectedBeforeWrite.has(probe.code)){
+     await progress('worker-prepared',{operationId,probeOutcome:'not-written'});
+     return blocked(probe.code,{operationId});
+    }
+    if(probe.state!=='verified'||probe.operationId!==operationId){
+     const code=probe.code??'READINESS_WRITE_UNVERIFIED';
+     probe=await inspectProbe(target,operationId,stillSelected);
+     if(!probe)return {state:'uncertain',code,accountId,target,operationId};
+     try{void Promise.resolve(record({...probe,kind:'readiness'})).catch(()=>{});}catch{}
+    }
    }
    await stillSelected();await provisioner.markVerified(target,auth.sessionId);
    const readiness=await readWorkerStatus(target,stillSelected);await stillSelected();
    if(readiness.state!=='READY')return blocked(readiness.code??'WORKER_NOT_READY',{stage:'post-probe-readiness'});
    readyCache.clear();
    const result={state:'completed',code:'CLOUDFLARE_READY',accountId,target,readiness,probe:probe.receipt,operationId:progressRecord.operationId};
-   await progress('complete',{result});return result;
+   await progress('complete',{result,probeOutcome:'verified'});return result;
   }catch(error){
    const diagnostic=safeWorkerDiagnostic(error.diagnostic),code=diagnostic?.code??(/^[A-Z_]+$/.test(error.code??'')?error.code:'WORKER_RECOVERY_FAILED');
    if(progressRecord.stage==='probe-dispatched')return {state:'uncertain',code:'SETUP_COMPLETION_PENDING',cause:code,accountId,target,operationId:progressRecord.operationId};

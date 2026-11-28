@@ -13,14 +13,14 @@ exit /b %ERRORLEVEL%
 :right_click
 set "PYTHONPATH=%CD%\11.25.2026\live-python-lab\python"
 if exist "lab-local\.venv\Scripts\python.exe" (
-  "lab-local\.venv\Scripts\python.exe" -m redown_live_lab right-click-fixture %2 %3 %4 %5 %6 %7
+  "lab-local\.venv\Scripts\python.exe" -m redown_live_lab right-click-fixture %2 %3 %4 %5 %6 %7 %8 %9
 ) else (
-  py -3 -m redown_live_lab right-click-fixture %2 %3 %4 %5 %6 %7
+  py -3 -m redown_live_lab right-click-fixture %2 %3 %4 %5 %6 %7 %8 %9
 )
 exit /b %ERRORLEVEL%
 
 :usage
 echo Usage  %~nx0 faults 8^|24^|100^|555^|1000
-echo Usage  %~nx0 right-click [--seed N] [--cases N] [--case N]
+echo Usage  %~nx0 right-click [--seed N] [--cases N] [--case N] [--timeout-seconds N]
 echo Run from the repository root after npm ci.
 exit /b 2
