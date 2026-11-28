@@ -207,5 +207,175 @@
     "observations.json",
     "fixture.log",
     "summary.json"
-  ]
+  ],
+  "hostedWindows": {
+    "revision": "4eeab1fd4782abde6560797974502a8663747c2a",
+    "evidenceLayer": "paired Python/native relay/local Workerd and R2 emulator",
+    "job": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46106925134/job/140861652841",
+    "artifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46106925134/artifacts/15248126204",
+    "artifactSha256": "c859dffbda216ae32cf8434ed8384d8561e658f9203c515d577eaceecfcf8456",
+    "partialReceiptDeadlineRegression": "PASS",
+    "cases": {
+      "65": {
+        "status": "PASS",
+        "elapsedSeconds": 2.21,
+        "actual": {
+          "accountAuthorized": true,
+          "capabilityFaults": [],
+          "code": "R2_HEAD_VERSION_SIZE",
+          "coldProbeMadeWorkerRequests": false,
+          "compiled": true,
+          "deployments": 1,
+          "dispatched": true,
+          "firstFailedBoundary": "worker.health",
+          "initialHealthCode": "WORKER_SETUP_REQUIRED",
+          "interruptedProbeId": "18a7c0cc-1a82-400b-a0db-42744713dc2e",
+          "isolatedMode": "depth",
+          "key": "qa/folder/depth-065.txt",
+          "localProofBefore": false,
+          "manualIntervention": false,
+          "nativeInput": null,
+          "objectCount": 1,
+          "operationId": "b689ed8e-33ee-4f6e-9521-b91f39efb456",
+          "originalOperationVerified": true,
+          "originalProbeReconciled": true,
+          "outsideScopeDenied": true,
+          "peakLocalRuntimes": 1,
+          "probeStatusIds": [
+            "18a7c0cc-1a82-400b-a0db-42744713dc2e"
+          ],
+          "publicationRequests": 1,
+          "publicationVerified": true,
+          "readinessProbeRequests": 1,
+          "registrationAcknowledged": true,
+          "scenarioExercised": true,
+          "sha256": "cc106eb805c51ea49bff8474976c195851286feb87c9d9b5b1a1821ea6e6e42d",
+          "sourceAdmitted": true,
+          "verified": true,
+          "workerResponsive": true
+        },
+        "fixtureTransport": [
+          {
+            "boundary": "workerd-dispatch",
+            "causeCode": "ECONNRESET",
+            "code": null,
+            "deployment": 1,
+            "durationMs": 35,
+            "errno": null,
+            "injected": true,
+            "phase": "readiness-probe",
+            "route": "/probe",
+            "syscall": null,
+            "transport": "local-workerd-loopback",
+            "type": "TypeError"
+          }
+        ]
+      },
+      "83": {
+        "status": "PASS",
+        "elapsedSeconds": 2.812,
+        "actual": {
+          "accountAuthorized": true,
+          "capabilityFaults": [
+            "post-deploy",
+            "post-probe"
+          ],
+          "code": "R2_HEAD_VERSION_SIZE",
+          "coldProbeMadeWorkerRequests": false,
+          "compiled": true,
+          "deployments": 1,
+          "dispatched": true,
+          "firstFailedBoundary": "worker.health",
+          "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+          "isolatedMode": "depth",
+          "key": "qa/folder/depth-083.txt",
+          "localProofBefore": true,
+          "manualIntervention": false,
+          "nativeInput": null,
+          "objectCount": 1,
+          "operationId": "bd3cbd71-d211-408d-8b7a-ebe9c113b44d",
+          "originalOperationVerified": true,
+          "outsideScopeDenied": true,
+          "peakLocalRuntimes": 1,
+          "publicationRequests": 1,
+          "publicationVerified": true,
+          "readinessProbeRequests": 1,
+          "registrationAcknowledged": true,
+          "scenarioExercised": true,
+          "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+          "sourceAdmitted": true,
+          "verified": true,
+          "workerResponsive": true
+        },
+        "fixtureTransport": [
+          {
+            "boundary": "workerd-dispatch",
+            "causeCode": "ECONNRESET",
+            "code": null,
+            "deployment": 1,
+            "durationMs": 0,
+            "errno": null,
+            "injected": true,
+            "phase": "post-deploy",
+            "route": "/capabilities",
+            "syscall": null,
+            "transport": "local-workerd-loopback",
+            "type": "TypeError"
+          },
+          {
+            "boundary": "workerd-dispatch",
+            "causeCode": "ECONNRESET",
+            "code": null,
+            "deployment": 1,
+            "durationMs": 0,
+            "errno": null,
+            "injected": true,
+            "phase": "post-probe",
+            "route": "/capabilities",
+            "syscall": null,
+            "transport": "local-workerd-loopback",
+            "type": "TypeError"
+          }
+        ]
+      }
+    }
+  },
+  "linuxCampaign": {
+    "status": "PASS",
+    "seed": 271127,
+    "revision": "4eeab1fd4782abde6560797974502a8663747c2a",
+    "sourceDigest": "1daf74d56c175b7e499edcf6e5e20378e0cdeed352a8f52de1b46b7318823be0",
+    "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+    "extensionVersion": "0.3.32.6",
+    "protocol": "1.0.0",
+    "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+    "platform": "linux",
+    "nodeVersion": "24.22.1",
+    "elapsedSeconds": 348.811,
+    "deadlineSeconds": 2030,
+    "runnerExitCode": 0,
+    "stopCode": null,
+    "lastActiveCase": null,
+    "nativeInput": "NOT_TESTED",
+    "liveProvider": "NOT_TESTED",
+    "counts": {
+      "PASS": 100,
+      "FAIL": 0,
+      "NOT_TESTED": 0
+    },
+    "receiptId": "right-click-02a8d8a5-6a92-41a9-a4e1-baa7a802583c",
+    "unexpectedTransportFailures": 0
+  },
+  "localTests": {
+    "javascript": {
+      "passed": 887,
+      "failed": 0
+    },
+    "python": {
+      "passed": 29,
+      "failed": 0,
+      "windowsOnlySkipped": 2
+    },
+    "extensionBuild": "PASS"
+  }
 }

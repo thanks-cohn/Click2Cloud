@@ -130,3 +130,5 @@ call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd 
 ```
 
 Checkpoint 2B.1 remains open for the full reference Windows campaign and the existing installed-browser and live-provider gates.
+
+Hosted Windows CI on `4eeab1fd4782abde6560797974502a8663747c2a` passed both Case 65 and Case 83 and verified that a deadline retains completed cases. The Linux campaign passed 100/100, and the full JavaScript suite passed 887/887. [Windows receipts](https://github.com/thanks-cohn/Click2Cloud/actions/runs/46106925134/artifacts/15248126204)

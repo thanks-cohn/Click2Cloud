@@ -157,7 +157,7 @@ The owner campaign at `c644643`, seed 271127, completed with 99 PASS, 1 FAIL and
 - Final outcome READINESS_RECONCILE_REQUIRED, uncertain; zero publication requests and zero objects.
 - Original authorized save was not dispatched.
 
-Unlike the inspected warm-initialization failure, this experiment reached the production readiness path. The root cause of the socket reset is not established. The safe next investigation is to distinguish local fixture/runtime transport failure from production recovery limitations, then test read-only reconciliation of the original probe identity and continuation of the original save where justified. Never blindly repeat an uncertain write. A permanent deterministic regression for this failure class is a proposed next deliverable, not a completed test.
+This experiment reached the production readiness path after fixture initialization. The cause of the socket reset is still unknown. The Case 65 follow-up distinguishes the local transport boundary from the missing production reconciliation step. The permanent regression interrupts the reply after a verified write and requires read-only reconciliation of the original probe before the save continues. [Case 65 evidence](../../11.25.2026/alpha-three-runs/02-universal-cloud-compatibility/CASE_65_EVIDENCE.json)
 
 The campaign did not pass acceptance. One passing Case 83 does not establish the disappearance of all intermittent failures. Installed Windows native input and authorized live-provider evidence remain distinct outstanding requirements.
 
