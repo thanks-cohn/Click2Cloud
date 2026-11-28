@@ -114,6 +114,10 @@ def _verdict(expected, observed):
     differences = [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
                    for name, value in checks.items() if actual.get(name) != value]
     if expected['scenario'] in WARM_CONDITIONS:
+        if actual.get('originalOperationVerified') != expected['expected']['verified']:
+            differences.append({'predicate': 'original warm-scenario save operation',
+                                'expected': expected['expected']['verified'],
+                                'actual': actual.get('originalOperationVerified')})
         warm = observed.get('warmInitialization') or {}
         initial = warm.get('probe') or {}
         reconciled = warm.get('outcome') == 'reconciled'
@@ -134,7 +138,8 @@ def _verdict(expected, observed):
             and receipt.get('key') == f'{proof_prefix}/readiness.txt'
             and receipt.get('size') == len(f'Click2Cloud readback {operation}'.encode('utf-8'))
             and bool(receipt.get('etag')) and bool(receipt.get('version')),
-            'warm acknowledgment retained': (reconciled and initial.get('state') != 'verified')
+            'warm acknowledgment retained': (reconciled and initial.get('state') in ('blocked', 'uncertain', 'failed')
+                                             and bool(initial.get('code')))
             or (warm.get('outcome') == 'verified' and initial.get('state') == 'verified'),
         }
         if expected.get('interruptWarmProbe'):

@@ -132,13 +132,16 @@
   "loopbackInvestigation": {
     "pinnedComponents": {
       "miniflare": "4.20260730.0",
-      "workerd": "1.20260730.1"
+      "workerd": "1.20260730.1",
+      "undici": "7.28.0"
     },
     "established": [
       "The reference failure was recorded at the local Workerd loopback boundary.",
       "The Case 52 follow-up read the completed probe from the same runtime before intentional retirement.",
       "Case 65 evicts the extension host while retaining the started Workerd fixture.",
-      "The pinned Miniflare dispatch uses an Undici pool per runtime loopback origin."
+      "The pinned Miniflare dispatch uses an Undici pool per runtime loopback origin.",
+      "Miniflare sets options.reset=true per loopback dispatch. Undici sets the HTTP/1.1 Connection: close header and retires the socket after the response.",
+      "The 69 hosted Windows and 127 Linux probe dispatches all recorded a first-use socket. No uninjected transport error appeared in those runs."
     ],
     "unresolved": [
       "Which peer initiated the reported resets",
@@ -149,6 +152,375 @@
       "Preserve observations.json, fixture.log, progress.ndjson and summary.json for the same run.",
       "Correlate unplanned transport errors against loopbackProbes and runtimeLifecycles.",
       "Compare socket ordinals and previous routes, HTTP status, recheck runtime ordinal, stderr end/close, and retirement timestamps."
+    ],
+    "upstreamComparisons": [
+      {
+        "url": "https://github.com/cloudflare/workerd/issues/1376",
+        "distinction": "Workerd-to-Workerd keep-alive and same-port restart. Laboratory cases 52 and 65 were Node-to-Workerd on an active runtime."
+      },
+      {
+        "url": "https://github.com/cloudflare/workerd/issues/3998",
+        "distinction": "Other Windows report with WSARecv #64. It supplies no attribution for these probe resets."
+      }
     ]
+  },
+  "qualification": {
+    "runtimeRevision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+    "linux": {
+      "runs": [
+        {
+          "receipt": "right-click-1fa6bd58-d6db-45c2-aee1-9bc4a46244e6",
+          "revision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+          "sourceDigest": "1901e639b89b2f9d21d8d2de523bbdc5ab1bac09ffe6af3aaef6764a88f9174a",
+          "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+          "platform": "linux",
+          "osRelease": "6.18.57",
+          "arch": "x64",
+          "nodeVersion": "24.22.1",
+          "elapsedSeconds": 407.958,
+          "counts": {
+            "FAIL": 0,
+            "NOT_TESTED": 0,
+            "PASS": 100
+          },
+          "caseSelection": "1-100",
+          "modeScenarioCombinations": 30,
+          "distinctInjectedWarmCombinations": 15,
+          "warmOutcomes": {
+            "reconciled": 16,
+            "verified": 33
+          }
+        }
+      ],
+      "probesOnFreshSockets": 127,
+      "probesOnReusedSockets": 0,
+      "probeSocketsUnobserved": 0,
+      "injectedResets": 19,
+      "uninjectedTransportErrors": 0,
+      "runtimeResetWarnings": {},
+      "pinnedCases": {
+        "52": {
+          "operationId": "93bbd51a-7623-41a9-9da9-3080b12dcf83",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 0,
+          "deployments": 0,
+          "publicationRequests": 1,
+          "key": "qa/folder/simple-052.txt",
+          "sha256": "d4b8e9392c45de45ff7943cd94b048b704bcc6cb472d1f1e6864e6345b4f6e43"
+        },
+        "65": {
+          "operationId": "fbd16395-a4d7-4a62-ba7e-e1d818eb822c",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 1,
+          "deployments": 1,
+          "publicationRequests": 1,
+          "key": "qa/folder/depth-065.txt",
+          "sha256": "cc106eb805c51ea49bff8474976c195851286feb87c9d9b5b1a1821ea6e6e42d",
+          "interruptedProbeId": "967ddb46-2701-4701-8e39-13c1b4a81d8a",
+          "probeStatusIds": [
+            "967ddb46-2701-4701-8e39-13c1b4a81d8a"
+          ],
+          "originalProbeReconciled": true
+        },
+        "83": {
+          "operationId": "f5e02a11-fc37-403e-ad0b-7b93797e66d7",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 1,
+          "deployments": 1,
+          "publicationRequests": 1,
+          "key": "qa/folder/depth-083.txt",
+          "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+          "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+          "capabilityFaults": [
+            "post-deploy",
+            "post-probe"
+          ],
+          "peakLocalRuntimes": 1
+        }
+      }
+    },
+    "hostedWindows": {
+      "workflow": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46128832622",
+      "job": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46128832622/job/140929311578",
+      "artifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46128832622/artifacts/15256429760",
+      "negativeControls": [
+        {
+          "fault": "response-lost",
+          "receipt": "right-click-warm-negative-OTq45Q",
+          "code": "ERR_ASSERTION"
+        },
+        {
+          "fault": "service-unavailable",
+          "receipt": "right-click-warm-negative-lpFimU",
+          "code": "ERR_ASSERTION"
+        }
+      ],
+      "runs": [
+        {
+          "receipt": "right-click-126053b5-4937-4688-aecf-d4eabdcfa1e9",
+          "revision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+          "sourceDigest": "0839bda99c2be75d75a9875c9be4043d65f2e3dd556a7d155664d04b76c3d62b",
+          "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+          "platform": "win32",
+          "osRelease": "10.0.26100",
+          "arch": "x64",
+          "nodeVersion": "22.23.5",
+          "elapsedSeconds": 100.574,
+          "counts": {
+            "FAIL": 0,
+            "NOT_TESTED": 0,
+            "PASS": 44
+          },
+          "caseSelection": "1-44",
+          "modeScenarioCombinations": 30,
+          "distinctInjectedWarmCombinations": 15,
+          "warmOutcomes": {
+            "reconciled": 15,
+            "verified": 5
+          }
+        },
+        {
+          "receipt": "right-click-805442fa-5799-4d3f-89d7-6907deb794bd",
+          "revision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+          "sourceDigest": "0839bda99c2be75d75a9875c9be4043d65f2e3dd556a7d155664d04b76c3d62b",
+          "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+          "platform": "win32",
+          "osRelease": "10.0.26100",
+          "arch": "x64",
+          "nodeVersion": "22.23.5",
+          "elapsedSeconds": 3.221,
+          "counts": {
+            "FAIL": 0,
+            "NOT_TESTED": 0,
+            "PASS": 1
+          },
+          "caseSelection": "52",
+          "modeScenarioCombinations": 1,
+          "distinctInjectedWarmCombinations": 1,
+          "warmOutcomes": {
+            "reconciled": 1
+          }
+        },
+        {
+          "receipt": "right-click-c15f2102-baca-473f-aea1-da46048ddffc",
+          "revision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+          "sourceDigest": "0839bda99c2be75d75a9875c9be4043d65f2e3dd556a7d155664d04b76c3d62b",
+          "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+          "platform": "win32",
+          "osRelease": "10.0.26100",
+          "arch": "x64",
+          "nodeVersion": "22.23.5",
+          "elapsedSeconds": 2.811,
+          "counts": {
+            "FAIL": 0,
+            "NOT_TESTED": 0,
+            "PASS": 1
+          },
+          "caseSelection": "65",
+          "modeScenarioCombinations": 1,
+          "distinctInjectedWarmCombinations": 0,
+          "warmOutcomes": {}
+        },
+        {
+          "receipt": "right-click-f2229587-a880-46d5-ab42-7a18a109a59e",
+          "revision": "0c91e5b4eb1fc6be7bb87d32b24d0c0723830767",
+          "sourceDigest": "0839bda99c2be75d75a9875c9be4043d65f2e3dd556a7d155664d04b76c3d62b",
+          "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI",
+          "platform": "win32",
+          "osRelease": "10.0.26100",
+          "arch": "x64",
+          "nodeVersion": "22.23.5",
+          "elapsedSeconds": 4.218,
+          "counts": {
+            "FAIL": 0,
+            "NOT_TESTED": 0,
+            "PASS": 1
+          },
+          "caseSelection": "83",
+          "modeScenarioCombinations": 1,
+          "distinctInjectedWarmCombinations": 0,
+          "warmOutcomes": {
+            "verified": 1
+          }
+        }
+      ],
+      "probesOnFreshSockets": 69,
+      "probesOnReusedSockets": 0,
+      "probeSocketsUnobserved": 0,
+      "injectedResets": 19,
+      "uninjectedTransportErrors": 0,
+      "runtimeResetWarnings": {},
+      "pinnedCases": {
+        "52": {
+          "operationId": "f0226689-459c-4fca-86e8-b765c095adf8",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 0,
+          "deployments": 0,
+          "publicationRequests": 1,
+          "key": "qa/folder/simple-052.txt",
+          "sha256": "d4b8e9392c45de45ff7943cd94b048b704bcc6cb472d1f1e6864e6345b4f6e43",
+          "warmInitialization": {
+            "boundary": "verified",
+            "operationId": "4f27c91c-4d59-4234-a446-77581e710710",
+            "requests": [
+              {
+                "route": "/capabilities",
+                "httpStatus": 200,
+                "json": true,
+                "durationMs": 101
+              },
+              {
+                "route": "/probe",
+                "httpStatus": 200,
+                "json": true,
+                "durationMs": 43
+              },
+              {
+                "route": "/probe-status",
+                "httpStatus": 200,
+                "json": true,
+                "durationMs": 7
+              }
+            ],
+            "capability": {
+              "state": "PREPARED",
+              "code": null
+            },
+            "probe": {
+              "state": "uncertain",
+              "code": "READINESS_RECONCILE_REQUIRED",
+              "operationId": "4f27c91c-4d59-4234-a446-77581e710710",
+              "destination": {
+                "matchesScope": true,
+                "prefix": "qa/folder"
+              },
+              "proofKind": null,
+              "receipt": null
+            },
+            "probeStatus": {
+              "state": "verified",
+              "code": "R2_READBACK_BYTES",
+              "operationId": "4f27c91c-4d59-4234-a446-77581e710710",
+              "destination": {
+                "matchesScope": true,
+                "prefix": "qa/folder/.click2cloud-readiness/4f27c91c-4d59-4234-a446-77581e710710"
+              },
+              "proofKind": "independent-get-byte-comparison",
+              "receipt": {
+                "operationId": "4f27c91c-4d59-4234-a446-77581e710710",
+                "destination": {
+                  "matchesScope": true,
+                  "prefix": "qa/folder/.click2cloud-readiness/4f27c91c-4d59-4234-a446-77581e710710"
+                },
+                "key": "qa/folder/.click2cloud-readiness/4f27c91c-4d59-4234-a446-77581e710710/readiness.txt",
+                "size": 57,
+                "etag": "30f67e3d3223fd7c624e1010f789129f",
+                "version": "d3007ea081996116eea57c6f69712fbc"
+              }
+            },
+            "probeWrites": 1,
+            "outcome": "reconciled",
+            "replyLossInjected": true,
+            "experiment": "ordinary-initialization"
+          },
+          "loopbackProbes": [
+            {
+              "runtimeId": 1,
+              "route": "/probe",
+              "phase": "warm-initialization",
+              "atMs": 601,
+              "runtimeAgeMs": 146,
+              "httpStatus": 200,
+              "socket": {
+                "id": 2,
+                "ordinal": 1,
+                "previousRoute": null,
+                "sincePreviousSendMs": null
+              },
+              "durationMs": 46,
+              "injected": true,
+              "error": {
+                "type": "TypeError",
+                "code": null,
+                "causeCode": "ECONNRESET",
+                "errno": null,
+                "syscall": null
+              }
+            },
+            {
+              "runtimeId": 1,
+              "route": "/probe-status",
+              "phase": "warm-initialization",
+              "atMs": 650,
+              "runtimeAgeMs": 195,
+              "httpStatus": 200,
+              "socket": {
+                "id": 3,
+                "ordinal": 1,
+                "previousRoute": null,
+                "sincePreviousSendMs": null
+              },
+              "durationMs": 7,
+              "injected": false,
+              "error": null
+            }
+          ]
+        },
+        "65": {
+          "operationId": "81b86321-feec-4d47-bef4-1b558b71a9d3",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 1,
+          "deployments": 1,
+          "publicationRequests": 1,
+          "key": "qa/folder/depth-065.txt",
+          "sha256": "cc106eb805c51ea49bff8474976c195851286feb87c9d9b5b1a1821ea6e6e42d",
+          "interruptedProbeId": "3febee12-e6de-480a-b680-f545d805381b",
+          "probeStatusIds": [
+            "3febee12-e6de-480a-b680-f545d805381b"
+          ],
+          "originalProbeReconciled": true
+        },
+        "83": {
+          "operationId": "a04b5089-d15b-482b-93ee-50077b6b6bb1",
+          "originalOperationVerified": true,
+          "readinessProbeRequests": 1,
+          "deployments": 1,
+          "publicationRequests": 1,
+          "key": "qa/folder/depth-083.txt",
+          "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+          "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+          "capabilityFaults": [
+            "post-deploy",
+            "post-probe"
+          ],
+          "peakLocalRuntimes": 1
+        }
+      }
+    },
+    "javascript": {
+      "status": "PASS",
+      "passed": 890
+    },
+    "python": {
+      "status": "PASS",
+      "passed": 29,
+      "skippedWindowsOnly": 2
+    },
+    "packagedExtensionBuild": "PASS",
+    "apiCommandDocs": "PASS",
+    "shelfDOMFixture": {
+      "status": "PASS",
+      "passed": 19
+    },
+    "packagedRightClickChromium": {
+      "status": "BLOCKED",
+      "reason": "The available local Chromium could not start the unpacked extension service worker. Chrome for Testing download returned HTTP 403.",
+      "receipt": "right-click-browser-FQ7edB/summary.json"
+    },
+    "otherHostedJobs": {
+      "baseline": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46107422525",
+      "candidate": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46128832622",
+      "outcome": "Both jobs failed at the same named steps as the baseline."
+    }
   }
 }
