@@ -29,6 +29,9 @@ def scenarios(seed, count):
         rng.shuffle(block)
         pairs.extend(block)
     for case, (mode, condition) in enumerate(pairs[:count], 1):
+        case_83_regression = seed == 271127 and case == 83
+        if case_83_regression:
+            mode, condition = 'depth', 'endpoint-missing'
         name = f'{mode}-{case:03d}.txt'
         prefix = 'qa/folder/'
         payload = f'ReDown 2B.1 fixture {seed} {case}\n'
@@ -43,7 +46,7 @@ def scenarios(seed, count):
                 'deployments': 0 if condition in ('returning', 'compatible-build', 'revoked', 'transient-health') else 1,
             },
         }
-        if seed == 271127 and case == 83:
+        if case_83_regression:
             plan['capabilityFaults'] = ['post-deploy', 'post-probe']
         yield plan
 

@@ -1181,8 +1181,8 @@ record. A retry issues no deployment, probe write or user publication, and a
 lost session fences further requests. The unchanged dispatcher continues its
 original operation and exact target only after the capability check succeeds.
 
-The existing paired CMD runner always exercises both phases for seed `271127`,
-Case `83`. It requires confirmed script absence, one replacement deployment,
+The existing paired CMD runner pins seed `271127`, Case `83`, to Depth with a
+missing endpoint and both transient faults. It requires confirmed script absence, one replacement deployment,
 one readiness probe, one exact publication under the initially admitted
 operation ID and a matching independently reopened SHA-256. The fixture shuts
 down the old local runtime before starting its replacement and records safe
