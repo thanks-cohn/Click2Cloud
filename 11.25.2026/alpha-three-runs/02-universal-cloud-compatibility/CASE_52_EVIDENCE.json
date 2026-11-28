@@ -521,6 +521,67 @@
       "baseline": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46107422525",
       "candidate": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46128832622",
       "outcome": "Both jobs failed at the same named steps as the baseline."
+    },
+    "hostedWindowsRequalification": {
+      "revision": "3cf219c866c8aa928cc0f21219ebeac3b0534332",
+      "artifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46129800140/artifacts/15257377016",
+      "counts": {
+        "PASS": 47,
+        "FAIL": 0,
+        "NOT_TESTED": 0
+      },
+      "replacementProbeReadAfterHttp200": {
+        "case": 36,
+        "mode": "simple",
+        "scenario": "endpoint-missing",
+        "receipt": "right-click-6f002ad2-321f-4280-b276-fd693a1ae032",
+        "actual": {
+          "readinessProbeRequests": 1,
+          "publicationRequests": 1,
+          "deployments": 1,
+          "originalOperationVerified": true,
+          "operationId": "b0d878d5-a4a7-47ae-8b38-040f78524953",
+          "key": "qa/folder/simple-036.txt",
+          "sha256": "9fa83d14333b101a21f102ef825b2621c08e2e0060d9a16b70ef4ee854885c8d"
+        },
+        "loopbackProbes": [
+          {
+            "atMs": 1222,
+            "durationMs": 33,
+            "error": null,
+            "httpStatus": 200,
+            "injected": false,
+            "phase": "readiness-probe",
+            "route": "/probe",
+            "runtimeAgeMs": 123,
+            "runtimeId": 2,
+            "socket": {
+              "id": 2,
+              "ordinal": 1,
+              "previousRoute": null,
+              "sincePreviousSendMs": null
+            }
+          },
+          {
+            "atMs": 1259,
+            "durationMs": 5,
+            "error": null,
+            "httpStatus": 200,
+            "injected": false,
+            "phase": "readiness-reconciliation",
+            "route": "/probe-status",
+            "runtimeAgeMs": 160,
+            "runtimeId": 2,
+            "socket": {
+              "id": 3,
+              "ordinal": 1,
+              "previousRoute": null,
+              "sincePreviousSendMs": null
+            }
+          }
+        ],
+        "cause": "Unknown. The receipt records a successful reconciliation after the initial response did not constitute proof. It contains no uninjected reset report."
+      }
     }
   }
 }

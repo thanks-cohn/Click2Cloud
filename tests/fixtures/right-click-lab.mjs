@@ -44,7 +44,7 @@ const safeTransportError=error=>({
 // URL, and retain only socket ordinals and timing. Never record headers.
 function observeLoopbackSockets(){
  const context=new AsyncLocalStorage(),requests=new WeakMap(),sockets=new WeakMap();
- const created=channel('undici:request:create'),sent=channel('undici:client:sendHeaders');
+ const created=channel('undici:request:create'),sent=channel('undici:client:sendHeaders'),failed=channel('undici:request:error');
  const onCreate=({request})=>{
   const evidence=context.getStore();
   if(evidence&&request.origin===evidence.origin&&request.path===evidence.route)requests.set(request,evidence);
@@ -58,9 +58,13 @@ function observeLoopbackSockets(){
    sincePreviousSendMs:previous?Math.round(now-previous.at):null};
   sockets.set(socket,{id,ordinal,route:evidence.route,at:now});
  };
- created.subscribe(onCreate);sent.subscribe(onSend);
+ const onError=({request,error})=>{
+  const evidence=requests.get(request);
+  if(evidence)evidence.loopback.networkError={atMs:evidence.elapsed(),...safeTransportError(error)};
+ };
+ created.subscribe(onCreate);sent.subscribe(onSend);failed.subscribe(onError);
  return {run:(evidence,dispatch)=>context.run(evidence,dispatch),
-  close(){created.unsubscribe(onCreate);sent.unsubscribe(onSend);}};
+  close(){created.unsubscribe(onCreate);sent.unsubscribe(onSend);failed.unsubscribe(onError);}};
 }
 
 function probeEvidence(result,target,operationId){
@@ -118,7 +122,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    ordinal:index+1,total:manifest.cases.length,case:scenario.case,mode:scenario.mode,scenario:scenario.scenario,
    phase,status,caseElapsedMs:Math.round(performance.now()-started),...(observation?{observation}:{})
   });
-  const fixture={phase:'fixture-initialization',warmInitialization:null,fixtureTransport:[],runtimeLifecycles:[],loopbackProbes:[]};
+  const fixture={phase:'fixture-initialization',warmInitialization:null,fixtureTransport:[],runtimeLifecycles:[],loopbackProbes:[],readinessProbes:[]};
   await report('fixture-initialization','RUNNING');
   try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixture,report),...fixture});}
   catch(error){
@@ -220,7 +224,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    registrar?.close();
    const provisioner=createProvisioner({request,authority:oauth.authority,readModule:async path=>modules.get(path),
     load:async key=>structuredClone(plans.get(key)),store:async(key,value)=>plans.set(key,structuredClone(value))});
-   const transport=createRemoteTransport({oauth,lookup:provisioner.lookup,expectedCodeDigest:buildDigest,pollIntervalMs:10,
+   const remote=createRemoteTransport({oauth,lookup:provisioner.lookup,expectedCodeDigest:buildDigest,pollIntervalMs:10,
     verifyAuthority:async()=>{if(grantDenied)throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});return true;},
     record:event=>current.recordRemoteResult(event),fetch:async(url,options)=>{
      const {hostname,pathname}=new URL(url);workerRequests++;
@@ -239,9 +243,9 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
      if(pathname==='/probe-status'&&!warm)probeStatusIds.push(JSON.parse(options.body).operationId);
      if(phase==='readiness-probe'||phase==='readiness-reconciliation')await report(phase,'RUNNING');
      const started=performance.now();
-     const evidence={origin:worker.origin,runtime:worker,route:pathname,socket:null};
      const loopback={runtimeId:worker.lifecycle.id,route:pathname,phase,atMs:elapsed(),
       runtimeAgeMs:elapsed()-worker.lifecycle.readyMs,httpStatus:null,socket:null};
+     const evidence={origin:worker.origin,runtime:worker,route:pathname,socket:null,loopback,elapsed};
      let injected=false,errorEvidence=null;
      try{
       if(phase&&capabilityFaults.includes(phase)&&!injectedFaults.includes(phase)){
@@ -280,11 +284,22 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
        runtimeStderrEnded:worker.lifecycle.stderrEndedMs!==null||worker.lifecycle.stderrClosedMs!==null});
       throw error;
      }finally{
-      if(pathname==='/probe'||pathname==='/probe-status')fixture.loopbackProbes.push({
-       ...loopback,socket:evidence.socket,durationMs:Math.round(performance.now()-started),injected,error:errorEvidence
-      });
+      if(pathname==='/probe'||pathname==='/probe-status')fixture.loopbackProbes.push(Object.assign(loopback,{
+       socket:evidence.socket,durationMs:Math.round(performance.now()-started),injected,error:errorEvidence
+      }));
      }
     }});
+   const observeReadiness=async(route,target,operationId,send)=>{
+    if(fixture.phase==='fixture-initialization')return send();
+    const observation={route,operationId,atMs:elapsed()};
+    fixture.readinessProbes.push(observation);
+    try{const result=await send();observation.result=probeEvidence(result,target,operationId);return result;}
+    catch(error){observation.error=safeTransportError(error);throw error;}
+   };
+   const transport={...remote,
+    probe:args=>observeReadiness('/probe',args.target,args.operationId,()=>remote.probe(args)),
+    probeStatus:(target,id,options)=>observeReadiness('/probe-status',target,id,()=>remote.probeStatus(target,id,options))
+   };
    cloudflare=createCloudflareOnboarding({current,oauth,provisioner,transport,inspectBucket:async()=>!grantDenied});
    trace=createRightClickObservation({readCurrent:current.read,inspectNative:()=>registrar.inspect(),
     readPlan:provisioner.lookup,readResult:current.readRemoteResult,readConnection:oauth.status});

@@ -113,6 +113,16 @@ def _verdict(expected, observed):
         })
     differences = [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
                    for name, value in checks.items() if actual.get(name) != value]
+    if expected.get('interruptSetupProbe'):
+        probe_id = actual.get('interruptedProbeId')
+        outcomes = observed.get('readinessProbes') or []
+        initial = next((event.get('result') or {} for event in outcomes
+                        if event['route'] == '/probe' and event['operationId'] == probe_id), {})
+        verified = any(event['route'] == '/probe-status' and event['operationId'] == probe_id
+                       and (event.get('result') or {}).get('state') == 'verified' for event in outcomes)
+        if initial.get('code') != 'READINESS_RECONCILE_REQUIRED' or not verified:
+            differences.append({'predicate': 'original interrupted setup probe outcomes retained',
+                                'expected': True, 'actual': False})
     if expected['scenario'] in WARM_CONDITIONS:
         if actual.get('originalOperationVerified') != expected['expected']['verified']:
             differences.append({'predicate': 'original warm-scenario save operation',
