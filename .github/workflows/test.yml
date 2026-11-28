@@ -3,6 +3,33 @@ on:
   push:
   pull_request:
 jobs:
+  windows-right-click-case-83:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          architecture: x64
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:extension
+      - name: Replay the permanent Case 83 regression
+        shell: cmd
+        run: |
+          python -m venv lab-local\.venv
+          if errorlevel 1 exit /b %ERRORLEVEL%
+          call 11.25.2026\alpha-three-runs\02-universal-cloud-compatibility\part2-lab.cmd right-click --seed 271127 --case 83
+      - name: Retain the scenario and all observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-right-click-case-83
+          path: lab-local/verification/right-click-*
+          if-no-files-found: warn
   unit:
     runs-on: ubuntu-latest
     steps:

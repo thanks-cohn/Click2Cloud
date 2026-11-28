@@ -1168,3 +1168,22 @@ The existing CMD fixture drives the production registrar and signed transport
 against isolated Workerd and independently checks reopened object hashes.
 The packaged browser runner uses each mode with a fresh profile and can drive
 the actual native menu on Linux/X11.
+
+### Case 83 post-probe capability recovery
+
+`recoverCloudflareDestination` uses the existing capability read policy before
+setup, during propagation, and after recording a verified readiness probe.
+After the probe, a transient transport or response failure gets up to two
+read-only retries. Each retry rechecks the original OAuth session, configured
+scope and setup approval. A current authenticated `READY` response is still
+required. Exhaustion returns the observed failure and retains the probe
+record. A retry issues no deployment, probe write or user publication, and a
+lost session fences further requests. The unchanged dispatcher continues its
+original operation and exact target only after the capability check succeeds.
+
+The existing paired CMD runner always exercises both phases for seed `271127`,
+Case `83`. It requires confirmed script absence, one replacement deployment,
+one readiness probe, one exact publication under the initially admitted
+operation ID and a matching independently reopened SHA-256. The fixture shuts
+down the old local runtime before starting its replacement and records safe
+startup or dispatch error codes separately from the production verdict.

@@ -28,7 +28,12 @@ const until=async check=>{
  }
  throw Object.assign(Error('FIXTURE_BOUNDARY_TIMEOUT'),{code:'FIXTURE_BOUNDARY_TIMEOUT'});
 };
-const safeCode=error=>/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:'FIXTURE_ASSERTION_FAILED';
+const safeCode=(error,fallback='FIXTURE_ASSERTION_FAILED')=>/^[A-Z][A-Z0-9_]{1,79}$/.test(error?.code??'')?error.code:fallback;
+const safeTransportError=error=>({
+ type:['Error','TypeError','AbortError','TimeoutError','SocketError','MiniflareCoreError'].includes(error?.name)?error.name:null,
+ code:safeCode(error,null),causeCode:safeCode(error?.cause,null),
+ errno:Number.isInteger(error?.cause?.errno)?error.cause.errno:Number.isInteger(error?.errno)?error.errno:null
+});
 
 export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs,cli,buildInfo,accountId,bucketName}){
  const manifest=JSON.parse(await readFile(manifestPath,'utf8'));
@@ -41,18 +46,19 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
   }}]});
  const outcome={evidenceLayer:'paired-python/native-loopback-production-registrar-signed-workerd-r2',
   revision:buildInfo.revision,sourceDigest:buildInfo.sourceDigest,workerCodeDigest:deployedDigest,
-  extensionVersion:buildInfo.extensionVersion,protocol:'1.0.0',cases:[]};
+  extensionVersion:buildInfo.extensionVersion,protocol:'1.0.0',platform:process.platform,nodeVersion:process.versions.node,cases:[]};
  const save=()=>writeFile(join(dirname(manifestPath),'observations.json'),JSON.stringify(outcome,null,2)+'\n');
  for(const scenario of manifest.cases){
-  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario)});}
+  const fixtureTransport=[];
+  try{outcome.cases.push({case:scenario.case,status:'OBSERVED',...await runScenario(scenario,fixtureTransport),fixtureTransport});}
   catch(error){
-   outcome.cases.push({case:scenario.case,status:'FAIL',code:safeCode(error),errorType:error.name,location:String(error.stack).split('\n').find(line=>line.includes('right-click-lab.mjs'))?.trim().replace(/^.*right-click-lab.mjs:/,'right-click-lab.mjs:')});
+   outcome.cases.push({case:scenario.case,status:'FAIL',code:safeCode(error),errorType:error.name,location:String(error.stack).split('\n').find(line=>line.includes('right-click-lab.mjs'))?.trim().replace(/^.*right-click-lab.mjs:/,'right-click-lab.mjs:'),fixtureTransport});
   }
   await save();
  }
  return outcome.cases.every(item=>item.status==='OBSERVED');
 
- async function runScenario({mode,scenario,prefix,filename,payload}){
+ async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[]},fixtureTransport){
   assert(['simple','nested','depth'].includes(mode));
   const root={provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''};
   const exact={...root,prefix},sibling={...root,prefix:'qa/second/'};
@@ -61,9 +67,10 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
   for(const url of [mainURL,secondURL])sourceMock.get(sourceOrigin).intercept({path:new URL(url).pathname}).reply(200,payload,
    {headers:{'content-length':String(Buffer.byteLength(payload)),'content-type':'text/plain'}}).persist();
   const current=createCurrentStore({dbName:'right-click-fixture-'+randomUUID()});
-  const plans=new Map(),runtimes=new Map(),allWorkers=[];
+  const plans=new Map(),runtimes=new Map(),allWorkers=new Set();
+  const injectedFaults=[],admissions=[],submissions=[];
   let activeAuth='fixture-login',registrar,lab,engine,cloudflare,trace,preparedOptions;
-  let publicationRequests=0,deployments=0,workerRequests=0,healthFailures=0;
+  let publicationRequests=0,deployments=0,workerRequests=0,healthFailures=0,readinessProbeRequests=0,peakLocalRuntimes=0;
   let lostAck=0,settingsMissing=0,setupBlocked=false,armTransient=false,grantDenied=false;
   let releaseSetup;
   const setupHold=new Promise(resolve=>{releaseSetup=resolve;});
@@ -92,8 +99,15 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    assert.equal(bindings.CODE_DIGEST,deployedDigest);
    const mf=new Miniflare({modules:true,script:outputFiles[0].text,compatibilityDate:'2026-01-01',r2Buckets:['STORAGE'],
     durableObjects:{CLAIMS:{className:'RemoteClaims',useSQLite:true}},bindings,fetchMock:sourceMock});
-   allWorkers.push(mf);
-   await mf.ready;
+   allWorkers.add(mf);
+   peakLocalRuntimes=Math.max(peakLocalRuntimes,allWorkers.size);
+   const started=performance.now();
+   try{await mf.ready;}
+   catch(error){
+    fixtureTransport.push({boundary:'workerd-startup',deployment:deployments+1,
+     durationMs:Math.round(performance.now()-started),...safeTransportError(error)});
+    throw error;
+   }
    runtimes.set(name,{mf,bindings:metadata.bindings});
    deployments++;
    if(['lost-deploy-ack','evicted-setup'].includes(scenario)&&!lostAck++){throw Object.assign(Error('FIXTURE_LOST_DEPLOYMENT_ACK'),{code:'TRANSIENT_API_FAILURE'});}
@@ -110,11 +124,30 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     verifyAuthority:async()=>{if(grantDenied)throw Object.assign(Error('INSUFFICIENT_SCOPE'),{code:'INSUFFICIENT_SCOPE'});return true;},
     record:event=>current.recordRemoteResult(event),fetch:async(url,options)=>{
      const {hostname,pathname}=new URL(url);workerRequests++;
-     if(pathname==='/remote-save')publicationRequests++;
+     if(pathname==='/remote-save'){
+      publicationRequests++;
+      const {operationId,destination,source}=JSON.parse(options.body);
+      submissions.push({operationId,destination,source});
+     }
      if(pathname==='/capabilities'&&armTransient){armTransient=false;healthFailures++;throw Error('BENIGN_FIXTURE_CONNECTION_LOST');}
      const worker=runtimes.get(hostname.split('.')[0]);
      if(!worker)return new Response(null,{status:404});
-     return worker.mf.dispatchFetch(url,options);
+     const phase=pathname==='/capabilities'?(deployments===0?'retained':readinessProbeRequests?'post-probe':'post-deploy'):null;
+     if(pathname==='/probe')readinessProbeRequests++;
+     const started=performance.now();
+     let injected=false;
+     try{
+      if(phase&&capabilityFaults.includes(phase)&&!injectedFaults.includes(phase)){
+       injected=true;
+       injectedFaults.push(phase);
+       throw Object.assign(new TypeError('Fixture capability connection lost'),{cause:{code:'ECONNRESET'}});
+      }
+      return await worker.mf.dispatchFetch(url,options);
+     }catch(error){
+      fixtureTransport.push({boundary:'workerd-dispatch',route:pathname,phase,deployment:deployments,
+       durationMs:Math.round(performance.now()-started),injected,...safeTransportError(error)});
+      throw error;
+     }
     }});
    cloudflare=createCloudflareOnboarding({current,oauth,provisioner,transport,inspectBucket:async()=>!grantDenied});
    trace=createRightClickObservation({readCurrent:current.read,inspectNative:()=>registrar.inspect(),
@@ -126,7 +159,10 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     seen?.finish(result);return result;
    }});
    engine=createEngine({current,registrar,getAuthorization,providerSetupActions:true,
-    remoteSave:input=>transport.save({...input,prepare:cloudflare.ensureSaveReady})});
+    remoteSave:input=>{
+     admissions.push({operationId:input.operationId,target:input.target,source:input.source});
+     return transport.save({...input,prepare:cloudflare.ensureSaveReady});
+    }});
    const getInventory=async()=>({scopes:[{...scope,workerReady:preparedDestination(await provisioner.lookup(root),root).state==='READY'}],
     depthScopes:[{...scope,workerReady:preparedDestination(await provisioner.lookup(root),root).state==='READY'}]});
    const api=createEngineApi({engine,current,oauth,cloudflare,getInventory,confirm:async()=>true,
@@ -145,9 +181,16 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     assert.equal((await preparedOptions.transport.probe({target:exact})).state,'verified');
     await preparedOptions.provisioner.markVerified(exact,activeAuth);
     deployments=0;
+    readinessProbeRequests=0;
     if(scenario!=='returning'){activeAuth='fixture-reconnected';startHost();}
     if(scenario==='transient-health')armTransient=true;
-    if(scenario==='endpoint-missing')runtimes.clear();
+    if(scenario==='endpoint-missing'){
+     // The retired listener must release its sockets and runtime resources
+     // before replacement, including when Windows runs this case in isolation.
+     runtimes.clear();
+     await worker.mf.dispose();
+     allWorkers.delete(worker.mf);
+    }
    }
 
    // Plain registration still uses the actual CURRENT/engine API. Explicitly
@@ -217,8 +260,16 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    if(scenario==='transient-health')scenarioExercised=healthFailures===1;
    if(['lost-deploy-ack','evicted-setup'].includes(scenario))scenarioExercised=lostAck===1&&deployments===1;
    if(scenario==='endpoint-missing')scenarioExercised=settingsMissing>0&&deployments===1;
+   const [admission]=admissions,[submission]=submissions;
+   const originalOperationVerified=!!(admissions.length===1&&submissions.length===1&&admission.operationId===submission.operationId&&
+    admission.operationId===read.receipt?.operationId&&admission.operationId===result.remoteOperationId&&
+    admission.target.accountId===exact.accountId&&admission.target.bucketName===exact.bucketName&&admission.target.prefix===prefix&&
+    submission.destination?.accountId===exact.accountId&&submission.destination?.bucketName===exact.bucketName&&
+    submission.destination?.prefix===prefix.slice(0,-1)&&admission.source.url===mainURL&&submission.source?.url===mainURL);
+   const firstHealth=read.attempt?.events.find(event=>event.stage==='worker.health');
    return {cold,observed:read,actual:{
     isolatedMode:modes.length===1?modes[0]:modes.join(','),
+    accountAuthorized:cold.observations.accountAuthorized.observed,
     compiled:cold.observations.compiled.observed,registrationAcknowledged:cold.observations.registrationAcknowledged.observed,
     coldProbeMadeWorkerRequests,publicationRequests,deployments,objectCount,scenarioExercised,
     localProofBefore:cold.observations.localWorkerProof.observed,
@@ -228,12 +279,15 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     verified:result.completion==='verified'&&read.observations.publicationVerified.observed===true,
     key:object?.key??null,sha256:object?sha(await object.arrayBuffer()):null,
     manualIntervention:read.observations.manualIntervention.observed,code:result.code??null,
+    capabilityFaults:injectedFaults,peakLocalRuntimes,readinessProbeRequests,originalOperationVerified,
+    firstFailedBoundary:read.attempt?.firstFailedBoundary??null,initialHealthCode:firstHealth?.code??null,
     operationId:result.remoteOperationId??result.operationId??null
    }};
   }finally{
    releaseSetup();registrar?.close();
    await lab?.ui('end').catch(()=>{});
    for(const worker of allWorkers)await worker.dispose();
+   await sourceMock.close();
   }
  }
 }

@@ -47,6 +47,40 @@ test('post-probe READY is mandatory and lost completion resumes by probe identit
  assert.equal(f.calls.find(x=>x.kind==='probe-status').operationId,initial.operationId);
  const unready=fixture();unready.postProbeReady=false;assert.equal((await unready.c.recoverDestination({target:child})).code,'WORKER_NOT_READY');
 });
+test('final capability reads retry briefly without repeating deployment or the verified probe',async()=>{
+ for(const transientFailures of [1,3]){
+  const f=fixture(),status=f.transport.status;
+  let readsAfterProbe=0;
+  f.transport.status=async target=>{
+   if(f.calls.some(call=>call.kind==='mark')&&++readsAfterProbe<=transientFailures)
+    return {state:'blocked',code:'TRANSPORT_UNAVAILABLE'};
+   return status(target);
+  };
+  const result=await f.c.ensureSaveReady(child);
+  assert.equal(readsAfterProbe,transientFailures===1?2:3);
+  assert.equal(result.code,transientFailures===1?'CLOUDFLARE_READY':'TRANSPORT_UNAVAILABLE');
+  const writes=f.calls.filter(call=>['prepare','probe','mark'].includes(call.kind));
+  assert.deepEqual(writes.map(call=>call.kind),['prepare','probe','mark']);
+  for(const call of writes)assert.deepEqual(call.target,child);
+  const setup=[...f.records.values()].find(record=>record.operationId===writes[1].operationId);
+  assert.equal(setup.stage,transientFailures===1?'complete':'probe-dispatched');
+ }
+});
+test('authorization changes during final capability recovery fence the next request',async()=>{
+ const f=fixture(),status=f.transport.status,authority=await f.oauth.authority();
+ let readsAfterProbe=0;
+ f.transport.status=async target=>{
+  if(!f.calls.some(call=>call.kind==='mark'))return status(target);
+  readsAfterProbe++;
+  f.oauth.authority=async()=>({...authority,sessionId:'different-session'});
+  return {state:'blocked',code:'TRANSPORT_UNAVAILABLE'};
+ };
+ const result=await f.c.recoverDestination({target:child});
+ assert.equal(readsAfterProbe,1);
+ assert.equal(result.state,'uncertain');
+ assert.equal(result.cause,'AUTHORIZATION_REVOKED');
+ assert.equal(result.operationId,f.calls.find(call=>call.kind==='probe').operationId);
+});
 test('an uncertain readiness write is inspected on retry and never automatically replayed',async()=>{
  const f=fixture();f.transport.probe=async x=>{f.calls.push({kind:'probe',operationId:x.operationId});return {state:'uncertain',code:'READINESS_RECONCILE_REQUIRED',operationId:x.operationId};};
  f.transport.probeStatus=async(target,operationId)=>{f.calls.push({kind:'probe-status',target,operationId});return {state:'uncertain',code:'PROBE_UNKNOWN'};};

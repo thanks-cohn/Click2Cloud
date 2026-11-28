@@ -32,7 +32,7 @@ def scenarios(seed, count):
         name = f'{mode}-{case:03d}.txt'
         prefix = 'qa/folder/'
         payload = f'ReDown 2B.1 fixture {seed} {case}\n'
-        yield {
+        plan = {
             'case': case, 'mode': INTERNAL_MODE.get(mode, mode), 'scenario': condition,
             'prefix': prefix, 'filename': name, 'payload': payload,
             'expected': {
@@ -43,6 +43,9 @@ def scenarios(seed, count):
                 'deployments': 0 if condition in ('returning', 'compatible-build', 'revoked', 'transient-health') else 1,
             },
         }
+        if seed == 271127 and case == 83:
+            plan['capabilityFaults'] = ['post-deploy', 'post-probe']
+        yield plan
 
 
 def _verdict(expected, observed):
@@ -71,6 +74,16 @@ def _verdict(expected, observed):
     }
     if expected['scenario'] in ('transient-health', 'lost-deploy-ack', 'registration-race', 'endpoint-missing', 'evicted-setup'):
         checks['scenarioExercised'] = True
+    if 'capabilityFaults' in expected:
+        checks.update({
+            'accountAuthorized': True,
+            'capabilityFaults': expected['capabilityFaults'],
+            'peakLocalRuntimes': 1,
+            'firstFailedBoundary': 'worker.health',
+            'initialHealthCode': 'WORKER_ENDPOINT_MISSING',
+            'readinessProbeRequests': 1,
+            'originalOperationVerified': True,
+        })
     return [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
             for name, value in checks.items() if actual.get(name) != value]
 
@@ -107,6 +120,7 @@ def fixture(seed, count, selected, *, repository):
     summary = {'status': overall, 'seed': seed, 'revision': results.get('revision'),
                'sourceDigest': results.get('sourceDigest'), 'workerCodeDigest': results.get('workerCodeDigest'), 'extensionVersion': results.get('extensionVersion'),
                'protocol': results.get('protocol'), 'evidenceLayer': results.get('evidenceLayer'),
+               'platform': results.get('platform'), 'nodeVersion': results.get('nodeVersion'),
                'nativeInput': 'NOT_TESTED', 'liveProvider': 'NOT_TESTED', 'counts': {
                    status: sum(case['status'] == status for case in cases)
                    for status in ('PASS', 'FAIL', 'NOT_TESTED')}, 'receipt': str(root)}

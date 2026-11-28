@@ -1,0 +1,1144 @@
+{
+  "schema": "redown.case-83-evidence/1",
+  "checkpointStatus": "OPEN_PENDING_REFERENCE_WINDOWS_VERIFICATION",
+  "baseline": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+  "version": "0.3.32.6",
+  "seed": 271127,
+  "case": 83,
+  "ownerWindows": {
+    "evidence": "Owner-reported observations. Raw campaign and replay receipts unavailable in this workspace.",
+    "attempts": [
+      {
+        "run": "100-case campaign",
+        "passes": 99,
+        "failures": 1,
+        "case83": "FAIL"
+      },
+      {
+        "run": "isolated replay 1",
+        "case83": "FAIL"
+      },
+      {
+        "run": "isolated replay 2",
+        "case83": "FAIL"
+      }
+    ],
+    "originalCase": {
+      "mode": "depth",
+      "scenario": "endpoint-missing",
+      "authorization": "SUCCESS",
+      "sourceAdmission": "SUCCESS",
+      "menuRegistration": "SUCCESS",
+      "deployments": 1,
+      "firstFailedBoundary": "worker.health",
+      "initialError": "WORKER_ENDPOINT_MISSING",
+      "subsequentError": "TRANSPORT_UNAVAILABLE",
+      "publicationRequests": 0,
+      "objectsPublished": 0,
+      "underlyingTransportError": null
+    }
+  },
+  "existingEvidence": [
+    "EVIDENCE_2B1.json",
+    "RIGHT_CLICK_CASES_2B1.ndjson",
+    "evidence.json"
+  ],
+  "localAttempts": [
+    {
+      "label": "unmodified Linux baseline",
+      "receiptId": "cfd401ab-c839-4f64-830f-3ebe90ef5859",
+      "platform": "linux",
+      "summary": {
+        "cases": [
+          {
+            "actual": {
+              "code": "R2_HEAD_VERSION_SIZE",
+              "coldProbeMadeWorkerRequests": false,
+              "compiled": true,
+              "deployments": 1,
+              "dispatched": true,
+              "isolatedMode": "depth",
+              "key": "qa/folder/depth-083.txt",
+              "localProofBefore": true,
+              "manualIntervention": false,
+              "nativeInput": null,
+              "objectCount": 1,
+              "operationId": "35d509a0-049d-4932-a438-02a33898625f",
+              "outsideScopeDenied": true,
+              "publicationRequests": 1,
+              "publicationVerified": true,
+              "registrationAcknowledged": true,
+              "scenarioExercised": true,
+              "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+              "sourceAdmitted": true,
+              "verified": true,
+              "workerResponsive": true
+            },
+            "case": 83,
+            "cold": {
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": null
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": null,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": null,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": null,
+                  "reason": "VERIFIED_RECEIPT_UNAVAILABLE",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": null,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": null,
+                  "reason": "NO_DISPATCH_HEALTH_EVIDENCE",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:34:58.506Z",
+              "prefix": "qa/folder/",
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "differences": [],
+            "mode": "depth",
+            "observed": {
+              "attempt": {
+                "events": [
+                  {
+                    "code": null,
+                    "outcome": null,
+                    "stage": "dispatch.enter"
+                  },
+                  {
+                    "code": "AUTH_VERIFIED",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "RESOLVE_STARTED",
+                    "outcome": "started",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "RESOLVE_OK",
+                    "outcome": "ok",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "WORKER_READINESS_CHECK",
+                    "outcome": "started",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "WORKER_ENDPOINT_MISSING",
+                    "outcome": "blocked",
+                    "stage": "worker.health"
+                  },
+                  {
+                    "code": "CLOUDFLARE_READY",
+                    "outcome": "ok",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "transfer.upload"
+                  },
+                  {
+                    "code": "REMOTE_SUBMISSION_ATTEMPTED",
+                    "outcome": "ok",
+                    "stage": "transfer.submitted"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "transfer.upload"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "transfer.verify"
+                  },
+                  {
+                    "code": null,
+                    "outcome": null,
+                    "stage": "provider.verification"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "transfer.verify"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  }
+                ],
+                "firstFailedBoundary": "worker.health",
+                "id": "8ab687c9-3904-48af-8013-3fd692585365",
+                "observedAt": 1795833298562,
+                "outcome": {
+                  "code": "R2_HEAD_VERSION_SIZE",
+                  "manualIntervention": false,
+                  "operationId": "35d509a0-049d-4932-a438-02a33898625f",
+                  "state": "completed"
+                }
+              },
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": null
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": true,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": false,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": true,
+                  "reason": "EXACT_RECEIPT",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": true,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": true,
+                  "reason": "CLOUDFLARE_READY",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:34:59.130Z",
+              "prefix": "qa/folder/",
+              "receipt": {
+                "etag": "6ba124732628bc854ac2e0396459d62e",
+                "key": "qa/folder/depth-083.txt",
+                "operationId": "35d509a0-049d-4932-a438-02a33898625f",
+                "size": 30,
+                "version": "939946e6668ac76f66383e8f08f20085"
+              },
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "scenario": "endpoint-missing",
+            "status": "PASS"
+          }
+        ],
+        "counts": {
+          "FAIL": 0,
+          "NOT_TESTED": 0,
+          "PASS": 1
+        },
+        "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+        "extensionVersion": "0.3.32.6",
+        "liveProvider": "NOT_TESTED",
+        "nativeInput": "NOT_TESTED",
+        "protocol": "1.0.0",
+        "revision": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+        "seed": 271127,
+        "sourceDigest": null,
+        "status": "PASS",
+        "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI"
+      }
+    },
+    {
+      "label": "baseline production with deterministic fixture faults",
+      "receiptId": "18d0312f-8aa6-48c9-8fe9-0b4f31596db1",
+      "platform": "linux",
+      "summary": {
+        "cases": [
+          {
+            "actual": {
+              "capabilityFaults": [
+                "post-deploy",
+                "post-probe"
+              ],
+              "code": "TRANSPORT_UNAVAILABLE",
+              "coldProbeMadeWorkerRequests": false,
+              "compiled": true,
+              "deployments": 1,
+              "dispatched": false,
+              "firstFailedBoundary": "worker.health",
+              "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+              "isolatedMode": "depth",
+              "key": null,
+              "localProofBefore": true,
+              "manualIntervention": null,
+              "nativeInput": null,
+              "objectCount": 0,
+              "operationId": "c462732f-9bcf-4294-8920-af968d43e91d",
+              "originalOperationVerified": false,
+              "outsideScopeDenied": true,
+              "peakLocalRuntimes": 1,
+              "publicationRequests": 0,
+              "publicationVerified": null,
+              "readinessProbeRequests": 1,
+              "registrationAcknowledged": true,
+              "scenarioExercised": true,
+              "sha256": null,
+              "sourceAdmitted": true,
+              "verified": false,
+              "workerResponsive": false
+            },
+            "case": 83,
+            "cold": {
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5"
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": null,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": null,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": null,
+                  "reason": "VERIFIED_RECEIPT_UNAVAILABLE",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": null,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": null,
+                  "reason": "NO_DISPATCH_HEALTH_EVIDENCE",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:37:00.718Z",
+              "prefix": "qa/folder/",
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "differences": [
+              {
+                "actual": false,
+                "expected": true,
+                "predicate": "workerResponsive"
+              },
+              {
+                "actual": false,
+                "expected": true,
+                "predicate": "dispatched"
+              },
+              {
+                "actual": null,
+                "expected": true,
+                "predicate": "publicationVerified"
+              },
+              {
+                "actual": 0,
+                "expected": 1,
+                "predicate": "publicationRequests"
+              },
+              {
+                "actual": 0,
+                "expected": 1,
+                "predicate": "objectCount"
+              },
+              {
+                "actual": false,
+                "expected": true,
+                "predicate": "verified"
+              },
+              {
+                "actual": null,
+                "expected": "qa/folder/depth-083.txt",
+                "predicate": "key"
+              },
+              {
+                "actual": null,
+                "expected": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+                "predicate": "sha256"
+              },
+              {
+                "actual": null,
+                "expected": false,
+                "predicate": "manualIntervention"
+              },
+              {
+                "actual": false,
+                "expected": true,
+                "predicate": "originalOperationVerified"
+              }
+            ],
+            "fixtureTransport": [
+              {
+                "boundary": "workerd-dispatch",
+                "causeCode": "ECONNRESET",
+                "code": "FIXTURE_ASSERTION_FAILED",
+                "deployment": 1,
+                "durationMs": 0,
+                "errno": null,
+                "injected": true,
+                "phase": "post-deploy",
+                "route": "/capabilities",
+                "type": "TypeError"
+              },
+              {
+                "boundary": "workerd-dispatch",
+                "causeCode": "ECONNRESET",
+                "code": "FIXTURE_ASSERTION_FAILED",
+                "deployment": 1,
+                "durationMs": 0,
+                "errno": null,
+                "injected": true,
+                "phase": "post-probe",
+                "route": "/capabilities",
+                "type": "TypeError"
+              }
+            ],
+            "mode": "depth",
+            "observed": {
+              "attempt": {
+                "events": [
+                  {
+                    "code": null,
+                    "outcome": null,
+                    "stage": "dispatch.enter"
+                  },
+                  {
+                    "code": "AUTH_VERIFIED",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "RESOLVE_STARTED",
+                    "outcome": "started",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "RESOLVE_OK",
+                    "outcome": "ok",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "WORKER_READINESS_CHECK",
+                    "outcome": "started",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "WORKER_ENDPOINT_MISSING",
+                    "outcome": "blocked",
+                    "stage": "worker.health"
+                  },
+                  {
+                    "code": "TRANSPORT_UNAVAILABLE",
+                    "outcome": "blocked",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "blocked",
+                    "stage": "worker.capability"
+                  }
+                ],
+                "firstFailedBoundary": "worker.health",
+                "id": "454bb875-03b5-49f1-b72d-fbc3f2db243d",
+                "observedAt": 1795833420778,
+                "outcome": {
+                  "code": "TRANSPORT_UNAVAILABLE",
+                  "manualIntervention": null,
+                  "operationId": "c462732f-9bcf-4294-8920-af968d43e91d",
+                  "state": "blocked"
+                }
+              },
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5"
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": false,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": null,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": null,
+                  "reason": "VERIFIED_RECEIPT_UNAVAILABLE",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": true,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": false,
+                  "reason": "TRANSPORT_UNAVAILABLE",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:37:01.662Z",
+              "prefix": "qa/folder/",
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "scenario": "endpoint-missing",
+            "status": "FAIL"
+          }
+        ],
+        "counts": {
+          "FAIL": 1,
+          "NOT_TESTED": 0,
+          "PASS": 0
+        },
+        "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+        "extensionVersion": "0.3.32.6",
+        "liveProvider": "NOT_TESTED",
+        "nativeInput": "NOT_TESTED",
+        "protocol": "1.0.0",
+        "revision": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+        "seed": 271127,
+        "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5",
+        "status": "FAIL",
+        "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI"
+      }
+    },
+    {
+      "label": "precommit implementation smoke test",
+      "receiptId": "c5b187d9-f023-403b-9c20-9f98971caad6",
+      "platform": "linux",
+      "summary": {
+        "cases": [
+          {
+            "actual": {
+              "capabilityFaults": [
+                "post-deploy",
+                "post-probe"
+              ],
+              "code": "R2_HEAD_VERSION_SIZE",
+              "coldProbeMadeWorkerRequests": false,
+              "compiled": true,
+              "deployments": 1,
+              "dispatched": true,
+              "firstFailedBoundary": "worker.health",
+              "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+              "isolatedMode": "depth",
+              "key": "qa/folder/depth-083.txt",
+              "localProofBefore": true,
+              "manualIntervention": false,
+              "nativeInput": null,
+              "objectCount": 1,
+              "operationId": "1bf6af00-1f29-4258-9ff7-0fa927afa9a6",
+              "originalOperationVerified": true,
+              "outsideScopeDenied": true,
+              "peakLocalRuntimes": 1,
+              "publicationRequests": 1,
+              "publicationVerified": true,
+              "readinessProbeRequests": 1,
+              "registrationAcknowledged": true,
+              "scenarioExercised": true,
+              "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+              "sourceAdmitted": true,
+              "verified": true,
+              "workerResponsive": true
+            },
+            "case": 83,
+            "cold": {
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5"
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": null,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": null,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": null,
+                  "reason": "VERIFIED_RECEIPT_UNAVAILABLE",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": null,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": null,
+                  "reason": "NO_DISPATCH_HEALTH_EVIDENCE",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:38:19.774Z",
+              "prefix": "qa/folder/",
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "differences": [],
+            "fixtureTransport": [
+              {
+                "boundary": "workerd-dispatch",
+                "causeCode": "ECONNRESET",
+                "code": null,
+                "deployment": 1,
+                "durationMs": 0,
+                "errno": null,
+                "injected": true,
+                "phase": "post-deploy",
+                "route": "/capabilities",
+                "type": "TypeError"
+              },
+              {
+                "boundary": "workerd-dispatch",
+                "causeCode": "ECONNRESET",
+                "code": null,
+                "deployment": 1,
+                "durationMs": 0,
+                "errno": null,
+                "injected": true,
+                "phase": "post-probe",
+                "route": "/capabilities",
+                "type": "TypeError"
+              }
+            ],
+            "mode": "depth",
+            "observed": {
+              "attempt": {
+                "events": [
+                  {
+                    "code": null,
+                    "outcome": null,
+                    "stage": "dispatch.enter"
+                  },
+                  {
+                    "code": "AUTH_VERIFIED",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "RESOLVE_STARTED",
+                    "outcome": "started",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "RESOLVE_OK",
+                    "outcome": "ok",
+                    "stage": "resolver"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "WORKER_READINESS_CHECK",
+                    "outcome": "started",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "WORKER_ENDPOINT_MISSING",
+                    "outcome": "blocked",
+                    "stage": "worker.health"
+                  },
+                  {
+                    "code": "TRANSPORT_UNAVAILABLE",
+                    "outcome": "blocked",
+                    "stage": "worker.health"
+                  },
+                  {
+                    "code": "TRANSPORT_UNAVAILABLE",
+                    "outcome": "blocked",
+                    "stage": "worker.health"
+                  },
+                  {
+                    "code": "CLOUDFLARE_READY",
+                    "outcome": "ok",
+                    "stage": "worker.readiness"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "intent"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "worker.capability"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "transfer.upload"
+                  },
+                  {
+                    "code": "REMOTE_SUBMISSION_ATTEMPTED",
+                    "outcome": "ok",
+                    "stage": "transfer.submitted"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "transfer.upload"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "transfer.verify"
+                  },
+                  {
+                    "code": null,
+                    "outcome": null,
+                    "stage": "provider.verification"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "transfer.verify"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_STARTED",
+                    "outcome": "started",
+                    "stage": "auth.check"
+                  },
+                  {
+                    "code": "REMOTE_STAGE_COMPLETE",
+                    "outcome": "ok",
+                    "stage": "auth.check"
+                  }
+                ],
+                "firstFailedBoundary": "worker.health",
+                "id": "a6003ac5-5f14-4cb7-ab83-54738866d842",
+                "observedAt": 1795833499831,
+                "outcome": {
+                  "code": "R2_HEAD_VERSION_SIZE",
+                  "manualIntervention": false,
+                  "operationId": "1bf6af00-1f29-4258-9ff7-0fa927afa9a6",
+                  "state": "completed"
+                }
+              },
+              "build": {
+                "commit": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+                "extensionVersion": "0.3.32.6",
+                "protocol": "1.0.0",
+                "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5"
+              },
+              "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+              "generation": 1,
+              "menuItemId": "c2c:item:65443e063bb1c0ae",
+              "mode": "depth",
+              "observations": {
+                "accountAuthorized": {
+                  "observed": true,
+                  "reason": "LOCAL_OAUTH_STATE",
+                  "source": "oauth-status"
+                },
+                "compiled": {
+                  "observed": true,
+                  "reason": "ROUTE_COMPILED",
+                  "source": "canonical-compiler"
+                },
+                "contentVerified": {
+                  "observed": null,
+                  "reason": "INDEPENDENT_READBACK_REQUIRED",
+                  "source": "provider-object-readback"
+                },
+                "dispatched": {
+                  "observed": true,
+                  "reason": "PRODUCTION_SUBMISSION",
+                  "source": "production-save"
+                },
+                "localWorkerProof": {
+                  "observed": true,
+                  "reason": "RECORDED_WRITE_PROOF",
+                  "source": "retained-worker-plan"
+                },
+                "manualIntervention": {
+                  "observed": false,
+                  "reason": "SAVE_OUTCOME",
+                  "source": "production-save"
+                },
+                "nativeInput": {
+                  "observed": null,
+                  "reason": "NATIVE_INPUT_REQUIRES_EXTERNAL_OBSERVATION",
+                  "source": "chrome-os-ui"
+                },
+                "publicationVerified": {
+                  "observed": true,
+                  "reason": "EXACT_RECEIPT",
+                  "source": "current-provider-receipt"
+                },
+                "registrationAcknowledged": {
+                  "observed": true,
+                  "reason": "CHROME_ACK",
+                  "source": "chrome-registrar"
+                },
+                "sourceAdmitted": {
+                  "observed": true,
+                  "reason": "SAVE_INTENT_AUTHORIZATION",
+                  "source": "production-save"
+                },
+                "workerResponsive": {
+                  "observed": true,
+                  "reason": "CLOUDFLARE_READY",
+                  "source": "save-worker-readiness"
+                }
+              },
+              "observedAt": "2026-11-28T02:38:20.842Z",
+              "prefix": "qa/folder/",
+              "receipt": {
+                "etag": "6ba124732628bc854ac2e0396459d62e",
+                "key": "qa/folder/depth-083.txt",
+                "operationId": "1bf6af00-1f29-4258-9ff7-0fa927afa9a6",
+                "size": 30,
+                "version": "6874beeeaabb71b7c7c939b8597693a7"
+              },
+              "revision": 1,
+              "schema": "redown.right-click-observation/1"
+            },
+            "scenario": "endpoint-missing",
+            "status": "PASS"
+          }
+        ],
+        "counts": {
+          "FAIL": 0,
+          "NOT_TESTED": 0,
+          "PASS": 1
+        },
+        "evidenceLayer": "paired-python/native-loopback-production-registrar-signed-workerd-r2",
+        "extensionVersion": "0.3.32.6",
+        "liveProvider": "NOT_TESTED",
+        "nativeInput": "NOT_TESTED",
+        "nodeVersion": "24.22.1",
+        "platform": "linux",
+        "protocol": "1.0.0",
+        "revision": "3a7ab092d0eedf812a0c06b96b2fa137f2f73bd9",
+        "seed": 271127,
+        "sourceDigest": "af041860a0137283b6f75900e3ab94654b59792035c0c67ecde71e5d079c79c5",
+        "status": "PASS",
+        "workerCodeDigest": "WII8-sbOYHDudzbYd5B6X64NzhFwTIYRPhaqJM4_TdI"
+      }
+    }
+  ],
+  "cloudflare": {
+    "connectedAccountsObservedByConnector": 1,
+    "workerApiConfirmed": "Worker settings and workers.dev route availability are separate API operations.",
+    "liveWrites": 0
+  }
+}
