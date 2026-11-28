@@ -7,7 +7,6 @@ const definitions = [
   ['entitlement.check','src/dashboard/controls.mjs','tests/glaciaring.test.mjs','unobservable'],
   ['activation.prepare','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
   ['activation.status','src/dashboard/controls.mjs','tests/dashboard-controls.test.mjs','partial'],
-  ['worker.readiness','src/cloudflare/onboarding.mjs','tests/cloudflare-destination-recovery.test.mjs','partial'],
   ['worker.capability','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
   ['fileApi.run','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],
   ['fileApi.batch','src/explorer/observed-api.mjs','tests/boundary-instrumentation.test.mjs','partial'],

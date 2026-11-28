@@ -174,7 +174,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
   async authorizeReady(target,readiness){
    const proof=readyProofs.get(readiness);
    if(!proof||clock()<proof.at||clock()-proof.at>=10000)return null;
-   try{const c=await cap(target,{live:false});return {sessionId:c.sessionId,authorizedTargets:
+   try{const c=await cap(target);return {sessionId:c.sessionId,authorizedTargets:
     equal(c.destination,proof.destination)&&c.sessionId===proof.sessionId&&c.planIdentity===proof.planIdentity?[target]:[]};}
    catch{return {sessionId:null,authorizedTargets:[]};}
   },
@@ -235,7 +235,7 @@ export function createRemoteTransport({oauth,lookup,fetch:fetcher=globalThis.fet
      if(!await timed('intentAuthorizationMs','intent',async()=>await authorize()&&await authorizeSource(source)))
       return blocked('AUTHORIZATION_DENIED');
      let readiness;
-     try{readiness=await timed('readinessMs','worker.readiness',()=>prepare(target,{authorize,signal,onObservation}));}
+     try{readiness=await timed('readinessMs','worker.capability',()=>prepare(target,{authorize,signal,onObservation}));}
      catch(error){return blocked(signal.aborted?'SAVE_CANCELLED':screenshotCode(error,'WORKER_RECOVERY_FAILED'),signal.aborted?'cancelled':'blocked');}
      if(readiness.state!=='completed')return blocked(readiness.code,readiness.state,{
       ...(readiness.requiredAction?{requiredAction:readiness.requiredAction}:{}),stage:readiness.stage??'worker-readiness'

@@ -191,7 +191,7 @@ test('absent Depth B plan is created for B, verified, persisted and reused; Narr
     assert.equal(out.state,expected,JSON.stringify(out));
     if(expected==='completed'||expected==='partial'){
      assert(count.capabilities-from.capabilities<=1,'Background login probing is independently bounded');
-     assert.equal(count.authority-from.authority,2);
+     assert(count.authority-from.authority>=2&&count.authority-from.authority<=4,'Live dispatch checks and any concurrent login health check stay bounded');
      assert.equal(count.upload-from.upload,1);
      assert.equal(count.verify-from.verify,1);
      assert.equal(out.receipt.key.split('/').slice(0,-1).join('/')+(target.prefix?'/':''),target.prefix);

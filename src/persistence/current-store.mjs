@@ -136,6 +136,7 @@ export function createCurrentStore({indexedDB=globalThis.indexedDB,dbName='click
       const result=await commitBoundary(async stores=>{
         const saved=await loadState(stores);boundary(stores,saved);const previous=saved.generation;
         if(acknowledge&&value!==previous.desired||!acknowledge&&(expectedGeneration!==previous.desired||value<=previous.desired))throw error('REVISION_CONFLICT');
+        if(acknowledge&&previous.applied===value)return previous;
         const current=acknowledge?{...previous,applied:value}:{desired:value,applied:previous.applied};
         validateGeneration(current);stores.state.put({id:'generation',value:current});
         await append(stores,{kind:'generation',mode:null,at:clock(),previous,current});return current;

@@ -96,7 +96,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    await mf.ready;
    runtimes.set(name,{mf,bindings:metadata.bindings});
    deployments++;
-   if(scenario==='lost-deploy-ack'&&!lostAck++){throw Object.assign(Error('FIXTURE_LOST_DEPLOYMENT_ACK'),{code:'TRANSIENT_API_FAILURE'});}
+   if(['lost-deploy-ack','evicted-setup'].includes(scenario)&&!lostAck++){throw Object.assign(Error('FIXTURE_LOST_DEPLOYMENT_ACK'),{code:'TRANSIENT_API_FAILURE'});}
    return envelope({});
   };
   const scope={target:root,authorized:true,complete:true,folders:['qa/',prefix,sibling.prefix]};
@@ -145,7 +145,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
     assert.equal((await preparedOptions.transport.probe({target:exact})).state,'verified');
     await preparedOptions.provisioner.markVerified(exact,activeAuth);
     deployments=0;
-    activeAuth='fixture-reconnected';startHost();
+    if(scenario!=='returning'){activeAuth='fixture-reconnected';startHost();}
     if(scenario==='transient-health')armTransient=true;
     if(scenario==='endpoint-missing')runtimes.clear();
    }
@@ -161,6 +161,16 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    const registration=preparedOptions.api.invoke({version:'3+1.1',method:'commitConfigChange',
     params:{changes,expectedRevision:before.product.revision,idempotencyKey:randomUUID(),
      ...(scenario==='registration-race'?{prepareModes:[mode]}:{})}},'gui');
+   if(['returning','evicted-setup'].includes(scenario)){
+    assert.equal((await registration).data.native.state,'completed');
+    if(scenario==='evicted-setup'){
+     const interrupted=await cloudflare.recoverDestination({target:exact});
+     assert.equal(interrupted.code,'TRANSIENT_API_FAILURE');
+     assert.equal((await preparedOptions.provisioner.lookup(exact)).state,'pending');
+    }else activeAuth='fixture-reconnected';
+    startHost();
+    assert.equal((await preparedOptions.api.reconcile({lifecycle:true,refreshDepthReadiness:false})).state,'completed');
+   }
    const row=await until(()=>{
     const native=registrar.inspect();
     if(native.pending||native.acknowledgedGeneration!==native.desired?.generation)return null;
@@ -205,7 +215,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
    const object=bucket&&await bucket.get(expectedKey);
    const objectCount=bucket?(await bucket.list()).objects.filter(object=>!object.key.includes('.click2cloud-readiness/')).length:0;
    if(scenario==='transient-health')scenarioExercised=healthFailures===1;
-   if(scenario==='lost-deploy-ack')scenarioExercised=lostAck===1&&deployments===1;
+   if(['lost-deploy-ack','evicted-setup'].includes(scenario))scenarioExercised=lostAck===1&&deployments===1;
    if(scenario==='endpoint-missing')scenarioExercised=settingsMissing>0&&deployments===1;
    return {cold,observed:read,actual:{
     isolatedMode:modes.length===1?modes[0]:modes.join(','),

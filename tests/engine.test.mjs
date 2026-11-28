@@ -5,10 +5,15 @@ import {createChromeRegistrar} from '../src/chrome/registrar.mjs';
 import {createDiagnostics} from '../src/glaciaring/index.mjs';
 import {callbackChrome,target} from '../scripts/glaciaring-fixtures.mjs';
 const t={...target('Pictures/'),provider:'fixture-browser'};
-async function fixture({sinkMode='normal',authFailure=false,completionFailure=false,uploadFailure=false}={}) {
+async function fixture({sinkMode='normal',authFailure=false,completionFailure=false,uploadFailure=false,acknowledgementLoss=false}={}) {
   const diagnostics=createDiagnostics(), outcomes=[],calls=[];
   let auth={sessionId:'fixture-session',authorizedTargets:[t]},state={configs:{simple:{destinations:[{id:'pictures',target:t}]},nested:{destinations:[]},depth:{scopes:[]}},generation:{desired:0,applied:null}};
-  const current={read:async()=>structuredClone(state),setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{state.generation.applied=g;}};
+  let acknowledgements=0;
+  const current={read:async()=>structuredClone(state),setDesiredGeneration:async g=>{state.generation.desired=g;},acknowledgeGeneration:async g=>{
+    acknowledgements++;
+    if(acknowledgementLoss&&acknowledgements===1)throw Object.assign(Error('Synthetic acknowledgement storage failure'),{code:'STORAGE_UNAVAILABLE'});
+    state.generation.applied=g;
+  }};
   const sink=sinkMode==='throwing'?()=>{throw Error('bad diagnostic sink');}:sinkMode==='off'?undefined:diagnostics.emit;
   const registrar=createChromeRegistrar({...callbackChrome(),sink});
   const engine=createEngine({current,registrar,diagnostics:sinkMode==='normal'?diagnostics:sink,
@@ -16,8 +21,8 @@ async function fixture({sinkMode='normal',authFailure=false,completionFailure=fa
     getAuthorization:async()=>authFailure?null:auth,authorizeSource:()=>true,
     onVerifiedCompletion:async()=>{if(completionFailure)throw Error('private-filename');},onSaveOutcome:o=>outcomes.push(o)});
   const spec=await engine.compile({mode:'simple',inventory:{revision:1,scopes:[{...target(),provider:'fixture-browser',authorized:true,workerReady:true,complete:true,folders:['Pictures/']}]}});
-  await engine.apply(spec);
-  return {engine,spec,registrar,diagnostics,outcomes,calls,revoke(){auth={sessionId:'different-session',authorizedTargets:[]};}};
+  const application=await engine.apply(spec);
+  return {engine,spec,application,acknowledgements,registrar,diagnostics,outcomes,calls,revoke(){auth={sessionId:'different-session',authorizedTargets:[]};}};
 }
 test('shared engine composes native ACK, exact canonical route, local capture and independently verified completion',async()=>{
   for(const sinkMode of ['normal','off','throwing']) {
@@ -48,4 +53,18 @@ test('uncertain write and failed verified completion do not replay or falsely co
     assert.equal(h.calls.length,1);assert(!JSON.stringify(result).includes('private-'));
     h.registrar.close();
   }
+});
+
+
+test('transient CURRENT acknowledgement failure retries the same generation and preserves the first save',async()=>{
+ const h=await fixture({acknowledgementLoss:true});
+ try{
+  assert.equal(h.application.state,'completed');
+  assert.equal(h.acknowledgements,2);
+  const row=h.spec.rows.find(row=>row.role==='save');
+  const result=await h.engine.save({itemId:row.id,generation:h.spec.generation,
+   source:{filename:'a.png',bytes:Uint8Array.of(1,2,3)}});
+  assert.equal(result.state,'completed');
+  assert.equal(h.calls.length,1);
+ }finally{h.registrar.close();}
 });

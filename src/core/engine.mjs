@@ -37,7 +37,20 @@ export function createEngine({current,registrar,providers,getAuthorization,autho
     retain(spec);
     const result=await registrar.apply(spec);
     if(result.state==='completed'&&result.appliedGeneration===spec.generation&&state.generation.applied!==spec.generation) {
-      try{await current.acknowledgeGeneration(spec.generation);}catch{return {...result,state:'partial',code:'PERSISTENCE_FAILED'};}
+      try{await current.acknowledgeGeneration(spec.generation);}
+      catch(error){
+        // A late acknowledgement races the authoritative generation. Verify
+        // the durable record and retry only if this exact generation still owns it.
+        try{
+          const latest=await current.read();
+          if(latest.generation.desired!==spec.generation)return {...result,state:'blocked',code:'STALE_GENERATION'};
+          if(latest.generation.applied!==spec.generation)await current.acknowledgeGeneration(spec.generation);
+        }catch(retryError){
+          const cause=retryError?.code??error?.code;
+          return {...result,state:'partial',code:'PERSISTENCE_FAILED',persistenceBoundary:'current-generation',
+           ...(/^[A-Z][A-Z0-9_]+$/.test(cause??'')?{persistenceCode:cause}:{})};
+        }
+      }
     }
     return result;
   }

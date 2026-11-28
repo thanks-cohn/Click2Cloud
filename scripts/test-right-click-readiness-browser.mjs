@@ -202,7 +202,7 @@ try{
    release();
    if(submission)assert.equal((await submission).completion,'verified');
    const committed=await registration;
-   assert.equal(committed.data?.native?.state,'completed',JSON.stringify({code:committed.code,native:committed.data?.native?.code}));
+   assert.equal(committed.data?.native?.state,'completed',JSON.stringify({code:committed.code,native:committed.data?.native}));
    const observed=await waitFor(()=>sw.evaluate(async()=>(await chrome.storage.local.get('lastSave')).lastSave).then(value=>
     value?.completion==='verified'?value:null),'verified menu outcome');
    assert.equal(run.deployStarted,1);assert.equal(run.publications.length,1);

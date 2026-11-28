@@ -118,7 +118,7 @@ test('ordinary Rename identifies missing, incompatible and out-of-scope plans an
   [plan=>({...plan,codeDigest:'unrecognized-build'}),'WORKER_BUILD_MISMATCH'],
   [plan=>({...plan,codeDigest:currentDigest,prefixScope:'Projects-old'}),'WORKER_DESTINATION_SCOPE_REQUIRED'],
   [plan=>({...plan,prefixScope:'Projects',secret:''}),'WORKER_SIGNING_RENEWAL_APPROVAL_REQUIRED'],
-  [plan=>({...plan,secret:fixtureSecret,protocol:'click2cloud-remote-1'}),'WORKER_SETUP_REQUIRED'],
+  [plan=>({...plan,secret:fixtureSecret,protocol:'click2cloud-remote-1'}),'WORKER_PROTOCOL_INCOMPATIBLE'],
   [plan=>({...plan,protocol:PROTOCOL,state:'pending'}),'WORKER_SETUP_REQUIRED'],
   [plan=>({...plan,state:'ready',codeDigest:previousWorkerDigests[0]}),'WORKER_BUILD_MISMATCH']
  ]){

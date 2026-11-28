@@ -14,11 +14,11 @@ from .evidence import document
 MODES = ('simple', 'narrow', 'depth')
 INTERNAL_MODE = {'narrow': 'nested'}
 CONDITIONS = ('cold', 'registration-race', 'returning', 'compatible-build', 'transient-health',
-              'revoked', 'sibling', 'lost-deploy-ack', 'endpoint-missing')
+              'revoked', 'sibling', 'lost-deploy-ack', 'endpoint-missing', 'evicted-setup')
 FOCUSED = [(mode, condition) for mode in MODES for condition in ('cold', 'registration-race')]
 FOCUSED += [('simple', 'returning'), ('narrow', 'compatible-build'), ('depth', 'transient-health'),
             ('simple', 'revoked'), ('narrow', 'sibling'), ('simple', 'lost-deploy-ack'),
-            ('depth', 'endpoint-missing')]
+            ('depth', 'endpoint-missing'), ('narrow', 'evicted-setup')]
 
 
 def scenarios(seed, count):
@@ -69,7 +69,7 @@ def _verdict(expected, observed):
         'sha256': expected['expected']['sha256'] if expected['expected']['verified'] else None,
         'manualIntervention': not expected['expected']['verified'],
     }
-    if expected['scenario'] in ('transient-health', 'lost-deploy-ack', 'registration-race', 'endpoint-missing'):
+    if expected['scenario'] in ('transient-health', 'lost-deploy-ack', 'registration-race', 'endpoint-missing', 'evicted-setup'):
         checks['scenarioExercised'] = True
     return [{'predicate': name, 'expected': value, 'actual': actual.get(name)}
             for name, value in checks.items() if actual.get(name) != value]
