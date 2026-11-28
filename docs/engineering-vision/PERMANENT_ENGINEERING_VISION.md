@@ -79,6 +79,56 @@ Evidence over claims: build and focused tests, actual packaged GUI behavior, ins
 
 **API-first means script-first evidence, not feature count.** Make the actual production mechanisms observable and callable through the existing authorized Python/CMD Laboratory wherever meaningful. Every ordinary engineering change should become independently testable; use simple observed true/false/unknown results, independent expectations, repeatable scenarios and permanent regressions. An agent should find and repair elementary failures before a customer does. Actual browser-only interactions require actual browser evidence; no simulated success, new unrestricted RPC or duplicate engine. The customer should never know about Workers, diagnostic tooling or internal recovery.
 
+## 11. Close the logical simulation-to-reality gap — design for agent-maintainability
+
+**Our long-term ambition is software that is designed to be maintained by agents, with human verification concentrated at genuine reality boundaries and exceptional cases.**
+
+In robotics, the simulation-to-reality (sim-to-real) gap describes the discrepancy between behavior in a simulated environment and behavior in the physical world. ReDown has an analogous challenge, but our principal subject is not physics. It is the logical behavior of the product: application state, customer intent, authorization, destinations, lifecycle transitions, concurrency, interruption, provider responses, persistence, recovery and independently verified outcomes.
+
+An agent can readily manipulate a logical experiment. It can generate an input, select a known initial state, exercise a production capability, introduce a precisely defined disturbance, observe the result and compare that result with an independent expectation. The difficulty is making that experiment genuinely representative of what the customer experiences. Closing this logical sim-to-real gap is therefore an architectural objective, not merely a testing task.
+
+### Design the product to be accessible to its maintainers
+
+Every applicable production capability should become meaningfully observable, callable and reproducible through the existing scoped APIs and Python/CMD Laboratory. The agent must exercise the actual mechanisms responsible for customer outcomes, not an imitation that happens to satisfy a test.
+
+- Keep one authoritative production contract behind the applicable human and agent entry points, with thin platform/provider adapters and clear ownership.
+- Represent logical state, operations, configuration and outcomes through stable, versioned, inspectable contracts.
+- Make initial conditions reproducible using validated manifests, synthetic inputs, seeds and explicit lifecycle transitions.
+- Provide independent expected outcomes, actual evidence, typed errors, safe fault injection, operation correlation and exact readback where applicable.
+- Preserve regression experiments and engineering knowledge across revisions, sessions and agents. A new agent should be able to inherit the repository, understand the vision, reproduce a failure and verify a repair without needing the original conversation.
+- Keep test access scoped, authenticated and isolated. Agent accessibility does not mean unrestricted RPC, exposure of credentials, a production backdoor, unauthorized cloud mutations or duplicate execution machinery.
+
+The [Scenario-Driven Reliability Engineering methodology](SCENARIO_DRIVEN_RELIABILITY_ENGINEERING.md) provides the practical experiment model. The [Exceptional-Outlier Principle](EXCEPTIONAL_OUTLIER_PRINCIPLE.md) sets the coverage objective: account for ordinary supported usage so thoroughly that newly discovered defects increasingly arise in exceptional conditions rather than everyday operations.
+
+### Make simulation and reality correct each other
+
+The Laboratory should be close enough to production that most logical defects can be reproduced, diagnosed, repaired and regression-tested without a person repeatedly operating the interface. Actual customer-facing evidence must then calibrate that model.
+
+Use a continuous feedback loop:
+
+1. Establish a customer-facing behavioral invariant.
+2. Reproduce it with the same applicable production logic under controlled conditions.
+3. Compare independent expected and actual outcomes.
+4. Qualify real browser input, installed behavior and authorized live-provider behavior at the appropriate checkpoints.
+5. Identify any discrepancy between the logical experiment and reality.
+6. Refine the experiment, instrumentation or responsible production mechanism, and preserve the discrepancy as a permanent regression where reproducible.
+
+A passing local fixture cannot erase a failing installed-browser or live-provider result. The same seed reproduces the declared experiment, not every timing or environmental detail. Browser permissions, operating-system behavior, real network conditions, provider changes and hardware constraints remain genuine boundaries. Where those boundaries cannot be represented faithfully, retain them as explicit real-world verification requirements rather than disguising them as solved.
+
+For example, the present right-click Laboratory tests production readiness and save logic with synthetic sources and a controlled local Worker/R2 environment. Its recorded Windows failures exposed differences in initialization and uncertain probe recovery. Comparing successful and unsuccessful receipts narrowed the investigation without requiring the owner to manually inspect every transfer. It is an early example of the desired feedback loop, not evidence that the logical sim-to-real gap is already closed.
+
+### The agent-maintainable software objective
+
+We aspire to make ReDown an example of a product whose ordinary upkeep and maintenance can be performed predominantly by capable engineering agents. In principle, sufficiently comprehensive logical coverage, simple shared architecture and faithful verification could make nearly all routine maintenance agent-executable.
+
+The intended maintenance cycle is: reproduce, diagnose, repair the responsible mechanism, exercise relevant regressions, check the broader supported behavior, and produce an evidence-backed handoff. Agents should do this autonomously within approved scope, rather than requiring a separate human prompt for each ordinary engineering decision.
+
+Human effort should increasingly concentrate on occasional real-world calibration, genuine native and authorized live verification, novel or exceptional conditions, subjective customer experience, material product decisions and approval of consequential changes where required. Human verification must remain whenever the evidence, risk or acceptance contract demands it; frequency should decrease through demonstrated capability, not by removing safeguards.
+
+This is a research and engineering ambition, not a claim that ReDown is already fully agent-maintainable, uniquely so, or capable of unsupervised production operation. Do not infer that simulated coverage guarantees real-world reliability. Measure progress through verified workflow coverage, reproducibility, the ability to transfer maintenance between agents, independently validated repairs and reductions in routine owner intervention without weakening evidence.
+
+**Build not merely a product that agents can modify, but a product whose behavior agents can understand, reproduce, verify and responsibly maintain.**
+
 ## Vision-first engineering autonomy
 
 Every agent reads this vision and the Customer Experience Vision before interpreting an individual request. Use the decided architecture and working references to resolve ordinary engineering details independently, anticipate related failures within the authorized checkpoint, and verify whole behavioral classes rather than wait for a separate prompt per issue. Ask the owner only for genuine unresolved product-policy, permission, cost, compatibility or scope decisions; record the affected blocker and proceed with independent work. The owner sets the destination; the agent chooses the simplest justified implementation path. This is bounded autonomy, not permission to bypass acceptance or implement later checkpoints. A handoff explains concrete improvements and evidence, not merely compliance language.
