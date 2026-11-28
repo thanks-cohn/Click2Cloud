@@ -1816,6 +1816,243 @@
       "hostedWindowsArtifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46099855219/artifacts/15244937591"
     },
     "determination": "Warm setup bypassed the signed capability read preceding the production probe. The owner receipt does not determine the reason the probe returned an unverified state.",
-    "followUp": "The fixture now checks the exact signed capability route first and records the original probe response, HTTP status, operation ID, duration and read-only inspection of ambiguous proof. A probe failure still blocks the scenario."
+    "followUp": "The fixture now checks the exact signed capability route first and records the original probe response, HTTP status, operation ID, duration and read-only inspection of ambiguous proof. A probe failure still blocks the scenario.",
+    "hostedWindowsVerification": {
+      "revision": "29f58c5a7d4a1fc6a64b486a1114e6853dcf3b3c",
+      "status": "PASS",
+      "nodeVersion": "22.23.5",
+      "job": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46103263246/job/140850258661",
+      "artifact": "https://github.com/thanks-cohn/Click2Cloud/actions/runs/46103263246/artifacts/15245733177",
+      "archiveSha256": "f4bfcabb59759f0a9c9f31defb64c2d8d719602f0c36bca4229bd43ba339cc33",
+      "phase": "scenario",
+      "warmInitialization": {
+        "boundary": "verified",
+        "capability": {
+          "code": null,
+          "state": "PREPARED"
+        },
+        "operationId": "8f79fceb-502f-4fba-954a-a537d341d6dd",
+        "probe": {
+          "code": "R2_READBACK_BYTES",
+          "destination": {
+            "matchesScope": true,
+            "prefix": "qa/folder/.click2cloud-readiness/8f79fceb-502f-4fba-954a-a537d341d6dd"
+          },
+          "operationId": "8f79fceb-502f-4fba-954a-a537d341d6dd",
+          "proofKind": "independent-get-byte-comparison",
+          "receipt": {
+            "destination": {
+              "matchesScope": true,
+              "prefix": "qa/folder/.click2cloud-readiness/8f79fceb-502f-4fba-954a-a537d341d6dd"
+            },
+            "etag": "5270cbff9af0014a99fb0c13ef58c416",
+            "key": "qa/folder/.click2cloud-readiness/8f79fceb-502f-4fba-954a-a537d341d6dd/readiness.txt",
+            "operationId": "8f79fceb-502f-4fba-954a-a537d341d6dd",
+            "size": 57,
+            "version": "f6f84f4833d2f8fbde058d710de04604"
+          },
+          "state": "verified"
+        },
+        "probeStatus": null,
+        "requests": [
+          {
+            "durationMs": 71,
+            "httpStatus": 200,
+            "json": true,
+            "route": "/capabilities"
+          },
+          {
+            "durationMs": 31,
+            "httpStatus": 200,
+            "json": true,
+            "route": "/probe"
+          }
+        ]
+      },
+      "actual": {
+        "accountAuthorized": true,
+        "capabilityFaults": [
+          "post-deploy",
+          "post-probe"
+        ],
+        "code": "R2_HEAD_VERSION_SIZE",
+        "coldProbeMadeWorkerRequests": false,
+        "compiled": true,
+        "deployments": 1,
+        "dispatched": true,
+        "firstFailedBoundary": "worker.health",
+        "initialHealthCode": "WORKER_ENDPOINT_MISSING",
+        "isolatedMode": "depth",
+        "key": "qa/folder/depth-083.txt",
+        "localProofBefore": true,
+        "manualIntervention": false,
+        "nativeInput": null,
+        "objectCount": 1,
+        "operationId": "075e4bf3-2397-4abc-b6be-b09478664140",
+        "originalOperationVerified": true,
+        "outsideScopeDenied": true,
+        "peakLocalRuntimes": 1,
+        "publicationRequests": 1,
+        "publicationVerified": true,
+        "readinessProbeRequests": 1,
+        "registrationAcknowledged": true,
+        "scenarioExercised": true,
+        "sha256": "8cff1e21d500082f0aa521cb0155d672573a2f3fd9007c0491d6f1b8857bfd46",
+        "sourceAdmitted": true,
+        "verified": true,
+        "workerResponsive": true
+      },
+      "fixtureTransport": [
+        {
+          "boundary": "workerd-dispatch",
+          "causeCode": "ECONNRESET",
+          "code": null,
+          "deployment": 1,
+          "durationMs": 0,
+          "errno": null,
+          "injected": true,
+          "phase": "post-deploy",
+          "route": "/capabilities",
+          "type": "TypeError"
+        },
+        {
+          "boundary": "workerd-dispatch",
+          "causeCode": "ECONNRESET",
+          "code": null,
+          "deployment": 1,
+          "durationMs": 0,
+          "errno": null,
+          "injected": true,
+          "phase": "post-probe",
+          "route": "/capabilities",
+          "type": "TypeError"
+        }
+      ]
+    },
+    "retainedLinuxFaultControls": {
+      "READINESS_RECONCILE_REQUIRED": {
+        "case": 83,
+        "status": "FAIL",
+        "code": "ERR_ASSERTION",
+        "errorType": "AssertionError",
+        "location": "right-click-lab.mjs:239:12)",
+        "phase": "fixture-initialization",
+        "warmInitialization": {
+          "boundary": "readiness-probe",
+          "operationId": "a2d32c11-eda7-4b65-b77a-317cfe7f9433",
+          "requests": [
+            {
+              "route": "/capabilities",
+              "httpStatus": 200,
+              "json": true,
+              "durationMs": 23
+            },
+            {
+              "route": "/probe",
+              "httpStatus": 200,
+              "json": true,
+              "durationMs": 20
+            },
+            {
+              "route": "/probe-status",
+              "httpStatus": 200,
+              "json": true,
+              "durationMs": 10
+            }
+          ],
+          "capability": {
+            "state": "PREPARED",
+            "code": null
+          },
+          "probe": {
+            "state": "uncertain",
+            "code": "READINESS_RECONCILE_REQUIRED",
+            "operationId": "a2d32c11-eda7-4b65-b77a-317cfe7f9433",
+            "destination": {
+              "matchesScope": true,
+              "prefix": "qa/folder"
+            },
+            "proofKind": null,
+            "receipt": null
+          },
+          "probeStatus": {
+            "state": "verified",
+            "code": "R2_READBACK_BYTES",
+            "operationId": "a2d32c11-eda7-4b65-b77a-317cfe7f9433",
+            "destination": {
+              "matchesScope": true,
+              "prefix": "qa/folder/.click2cloud-readiness/a2d32c11-eda7-4b65-b77a-317cfe7f9433"
+            },
+            "proofKind": "independent-get-byte-comparison",
+            "receipt": {
+              "operationId": "a2d32c11-eda7-4b65-b77a-317cfe7f9433",
+              "destination": {
+                "matchesScope": true,
+                "prefix": "qa/folder/.click2cloud-readiness/a2d32c11-eda7-4b65-b77a-317cfe7f9433"
+              },
+              "key": "qa/folder/.click2cloud-readiness/a2d32c11-eda7-4b65-b77a-317cfe7f9433/readiness.txt",
+              "size": 57,
+              "etag": "40928f0fd1626a89c523e0088cc8a07a",
+              "version": "ed1c5509bd5c52a17bcdc6a60e72e9f3"
+            }
+          }
+        },
+        "fixtureTransport": [
+          {
+            "boundary": "workerd-dispatch",
+            "route": "/probe",
+            "phase": "warm-initialization",
+            "deployment": 1,
+            "durationMs": 22,
+            "injected": true,
+            "type": "TypeError",
+            "code": null,
+            "causeCode": "ECONNRESET",
+            "errno": null
+          }
+        ]
+      },
+      "SERVICE_UNAVAILABLE": {
+        "case": 83,
+        "status": "FAIL",
+        "code": "ERR_ASSERTION",
+        "errorType": "AssertionError",
+        "location": "right-click-lab.mjs:239:12)",
+        "phase": "fixture-initialization",
+        "warmInitialization": {
+          "boundary": "readiness-probe",
+          "operationId": "426e9dac-3e92-4d32-8798-0279f7c8ac44",
+          "requests": [
+            {
+              "route": "/capabilities",
+              "httpStatus": 200,
+              "json": true,
+              "durationMs": 115
+            },
+            {
+              "route": "/probe",
+              "httpStatus": 503,
+              "json": true,
+              "durationMs": 0,
+              "injected": true
+            }
+          ],
+          "capability": {
+            "state": "PREPARED",
+            "code": null
+          },
+          "probe": {
+            "state": "blocked",
+            "code": "SERVICE_UNAVAILABLE",
+            "operationId": null,
+            "destination": null,
+            "proofKind": null,
+            "receipt": null
+          },
+          "probeStatus": null
+        },
+        "fixtureTransport": []
+      }
+    }
   }
 }

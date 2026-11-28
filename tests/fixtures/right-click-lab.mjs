@@ -82,7 +82,7 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
  }
  return outcome.cases.every(item=>item.status==='OBSERVED');
 
- async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[],warmProbeResponseLost=false},fixture){
+ async function runScenario({mode,scenario,prefix,filename,payload,capabilityFaults=[],warmProbeFault},fixture){
   const {fixtureTransport}=fixture;
   assert(['simple','nested','depth'].includes(mode));
   const root={provider:'cloudflare',connectionId:'cloudflare:'+accountId,accountId,bucketName,prefix:''};
@@ -168,12 +168,15 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
        injectedFaults.push(phase);
        throw Object.assign(new TypeError('Fixture capability connection lost'),{cause:{code:'ECONNRESET'}});
       }
-      const response=await worker.mf.dispatchFetch(url,options);
+      const probeFault=warm&&pathname==='/probe'?warmProbeFault:null;
+      const rejected=probeFault==='service-unavailable';
+      const response=rejected?Response.json({state:'blocked',code:'SERVICE_UNAVAILABLE'},{status:503}):
+       await worker.mf.dispatchFetch(url,options);
       if(warm)warm.requests.push({
        route:pathname,httpStatus:response.status,json:response.headers.get('content-type')?.split(';',1)[0]==='application/json',
-       durationMs:Math.round(performance.now()-started)
+       durationMs:Math.round(performance.now()-started),...(rejected?{injected:true}:{})
       });
-      if(warm&&warmProbeResponseLost&&pathname==='/probe'){
+      if(probeFault==='response-lost'){
        await response.arrayBuffer();
        injected=true;
        throw Object.assign(new TypeError('Fixture lost the warm probe response'),{cause:{code:'ECONNRESET'}});
@@ -234,6 +237,9 @@ export async function verifyRightClickFixture(manifestPath,{runtime,storage,opfs
      catch(error){warm.probeStatus={error:safeTransportError(error)};}
     }
     assert.equal(probe.state,'verified');
+    assert.equal(warm.probe.receipt?.operationId,warm.operationId);
+    assert.equal(warm.probe.receipt?.destination?.matchesScope,true);
+    assert(warm.probe.receipt?.key);
     warm.boundary='retain-write-proof';
     await preparedOptions.provisioner.markVerified(exact,activeAuth);
     warm.boundary='verified';
