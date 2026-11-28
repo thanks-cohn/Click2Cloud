@@ -16,6 +16,8 @@ Investigate actual original REDOWN and current Click2Cloud Worker/readiness/menu
 - Run focused regressions exercising independent fresh Simple, Narrow and Depth flows and returning-user, second target, immediate/raced first save, eviction/reconnect, concurrent preparation and real authorization loss. Test actual menu registration and dispatch and verified content; no initialized-state contamination. Use benign isolated fixtures; report evidence layers, exact executed counts and skipped/blocked tests.
 - Scope only necessary supporting fixes. Do not begin universal provider expansion, new shortcut UI, new accounting or Part 3 in this session. If a discovered defect belongs to 2B.2 or 2B.3, record it; fix a minimal prerequisite only when needed for the current repair.
 
+**Mandatory script-first qualification:** Follow the active Part 2 P0 Script-first engineering through the existing Python Laboratory contract. Extend the same paired CMD/Python/native connector incrementally; actual production functions, true/false/null observations with independent expected/actual evidence, focused and seeded/replay commands, permanent regressions. 2B.1 delivers working independent right-click/Worker readiness diagnosis for Simple/Narrow/Depth, not design-only. Read-only probes cannot prewarm cold tests. Codex tests, diagnoses and repairs ordinary reproducible failures before handoff; native input and authorized live proof are distinct. No second engine, connector, arbitrary RPC or scope bypass; customer never configures Workers or pairs Lab.
+
 ## Ordered checkpoints
 | Checkpoint | Output | Gate |
 |---|---|---|
